@@ -44,7 +44,7 @@ export default function EmailView() {
   // Fetch alias data for permission checking
   const fetchAlias = useCallback(async (aliasEmail) => {
     if (!aliasEmail) return null;
-    
+
     try {
       const response = await fetch('/api/aliases');
       if (response.ok) {
@@ -69,11 +69,11 @@ export default function EmailView() {
 
     try {
       console.log('Fetching email with ID:', params.id);
-      
+
       const userData = await fetchUser();
-      
+
       const response = await fetch(`/api/inbox/${params.id}`);
-      
+
       if (response.ok) {
         const emailData = await response.json();
         console.log('Email data received:', emailData);
@@ -169,25 +169,25 @@ export default function EmailView() {
   // Check if user can reply to this email
   const canUserReply = () => {
     if (!email || !user || !alias) return false;
-    
+
     // Don't allow reply to sent emails or spam emails
     if (email.isSentEmail || email.isSpam) return false;
-    
+
     // For personal aliases, owner can always reply
     if (!alias.isCollaborative) {
       return alias.ownerId?.toString() === user._id?.toString();
     }
-    
+
     // For collaborative aliases
     if (alias.ownerId?.toString() === user._id?.toString()) {
       return true; // Owner can always reply
     }
-    
+
     // Check collaborator permissions
     const collaborator = alias.collaborators?.find(
       c => c.userId?.toString() === user._id?.toString()
     );
-    
+
     // Members can reply, viewers cannot
     return collaborator && collaborator.role === 'member';
   };
@@ -209,8 +209,8 @@ export default function EmailView() {
       displayFrom: isSentEmail ? email.aliasEmail : email.from,
       displayTo: isSentEmail ? email.to : email.aliasEmail,
       emailType: isSpam ? 'Spam' : isSentEmail ? 'Sent' : isReplyToSent ? 'Reply Received' : 'Received',
-      avatarLetter: isSentEmail ? 
-        (email.to?.charAt(0) || 'T') : 
+      avatarLetter: isSentEmail ?
+        (email.to?.charAt(0) || 'T') :
         (email.from?.charAt(0) || 'F'),
       canReply: canUserReply()
     };
@@ -219,15 +219,15 @@ export default function EmailView() {
   // Get user role in collaborative alias
   const getUserRole = () => {
     if (!user || !alias) return null;
-    
+
     if (alias.ownerId?.toString() === user._id?.toString()) {
       return 'owner';
     }
-    
+
     const collaborator = alias.collaborators?.find(
       c => c.userId?.toString() === user._id?.toString()
     );
-    
+
     return collaborator ? collaborator.role : null;
   };
 
@@ -324,15 +324,14 @@ export default function EmailView() {
                 {email.subject || '(No Subject)'}
               </h1>
               {/* Email type badge */}
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                displayInfo.isSpam
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${displayInfo.isSpam
                   ? 'bg-red-100 text-red-800'
-                  : displayInfo.isSentEmail 
+                  : displayInfo.isSentEmail
                     ? 'bg-blue-100 text-blue-800'
-                    : displayInfo.isReplyToSent 
+                    : displayInfo.isReplyToSent
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800'
-              }`}>
+                }`}>
                 {displayInfo.emailType}
               </span>
               {/* Show user role for collaborative aliases */}
@@ -377,15 +376,14 @@ export default function EmailView() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-4">
                 {/* Avatar with appropriate letter and color for spam */}
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  displayInfo.isSpam
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${displayInfo.isSpam
                     ? 'bg-gradient-to-br from-red-400 to-red-600'
-                    : displayInfo.isSentEmail 
+                    : displayInfo.isSentEmail
                       ? 'bg-gradient-to-br from-blue-400 to-blue-600'
                       : displayInfo.isReplyToSent
                         ? 'bg-gradient-to-br from-green-400 to-green-600'
                         : 'bg-gradient-to-br from-gray-400 to-gray-600'
-                }`}>
+                  }`}>
                   <span className="text-white text-lg font-medium">
                     {displayInfo.avatarLetter?.toUpperCase() || '?'}
                   </span>
@@ -420,7 +418,7 @@ export default function EmailView() {
                           <span className="font-medium text-gray-700">Spam Score:</span> {email.spamScore?.toFixed(1) || 'Unknown'} / {email.spamThreshold || '5.0'}
                         </div>
                         <div>
-                          <span className="font-medium text-gray-700">Spam Level:</span> 
+                          <span className="font-medium text-gray-700">Spam Level:</span>
                           <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getSpamLevelColor(email.spamLevel).replace('border-', 'border ')}`}>
                             {email.spamLevel || 'Unknown'}
                           </span>
@@ -442,9 +440,11 @@ export default function EmailView() {
                     {alias?.isCollaborative && userRole && (
                       <div>
                         <span className="text-xs text-gray-500">
-                          Your role: {userRole} 
+                          Your role: {userRole}
+                          {/* eslint-disable-next-line react/no-unescaped-entities */}
                           {userRole === 'member' ? ' (can reply)' : userRole === 'viewer' ? ' (view only)' : ' (full access)'}
                         </span>
+
                       </div>
                     )}
                     {email.attachments?.length > 0 && (
@@ -503,14 +503,14 @@ export default function EmailView() {
                   <div>
                     <h4 className="text-sm font-medium text-yellow-800">Potentially Harmful Content</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      This email may contain malicious links, attachments, or requests for personal information. 
+                      This email may contain malicious links, attachments, or requests for personal information.
                       Do not click links or download attachments unless you trust the sender.
                     </p>
                   </div>
                 </div>
               </div>
             )}
-            
+
             {email.bodyHtml ? (
               <div
                 className={`prose max-w-none text-gray-700 leading-relaxed ${email.isSpam ? 'opacity-75' : ''}`}
@@ -538,11 +538,10 @@ export default function EmailView() {
                 {email.attachments.map((attachment, index) => (
                   <div
                     key={index}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
-                      email.isSpam 
-                        ? 'bg-red-50 border-red-200 opacity-75' 
+                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${email.isSpam
+                        ? 'bg-red-50 border-red-200 opacity-75'
                         : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <div className="flex-shrink-0">
                       <span className="text-xl">📎</span>
@@ -557,13 +556,12 @@ export default function EmailView() {
                       </p>
                     </div>
                     <button
-                      className={`flex-shrink-0 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded ${
-                        email.isSpam
+                      className={`flex-shrink-0 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded ${email.isSpam
                           ? 'text-red-400 cursor-not-allowed'
                           : 'text-blue-600 hover:text-blue-700 focus:ring-blue-500'
-                      }`}
+                        }`}
                       onClick={() =>
-                        email.isSpam 
+                        email.isSpam
                           ? alert('Cannot download attachments from spam emails for security reasons.')
                           : alert('Download functionality would be implemented here with proper file serving.')
                       }
