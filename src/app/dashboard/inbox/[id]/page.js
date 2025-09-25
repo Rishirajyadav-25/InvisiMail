@@ -325,12 +325,12 @@ export default function EmailView() {
               </h1>
               {/* Email type badge */}
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${displayInfo.isSpam
-                  ? 'bg-red-100 text-red-800'
-                  : displayInfo.isSentEmail
-                    ? 'bg-blue-100 text-blue-800'
-                    : displayInfo.isReplyToSent
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                ? 'bg-red-100 text-red-800'
+                : displayInfo.isSentEmail
+                  ? 'bg-blue-100 text-blue-800'
+                  : displayInfo.isReplyToSent
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
                 }`}>
                 {displayInfo.emailType}
               </span>
@@ -377,12 +377,12 @@ export default function EmailView() {
               <div className="flex items-start space-x-4">
                 {/* Avatar with appropriate letter and color for spam */}
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${displayInfo.isSpam
-                    ? 'bg-gradient-to-br from-red-400 to-red-600'
-                    : displayInfo.isSentEmail
-                      ? 'bg-gradient-to-br from-blue-400 to-blue-600'
-                      : displayInfo.isReplyToSent
-                        ? 'bg-gradient-to-br from-green-400 to-green-600'
-                        : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                  ? 'bg-gradient-to-br from-red-400 to-red-600'
+                  : displayInfo.isSentEmail
+                    ? 'bg-gradient-to-br from-blue-400 to-blue-600'
+                    : displayInfo.isReplyToSent
+                      ? 'bg-gradient-to-br from-green-400 to-green-600'
+                      : 'bg-gradient-to-br from-gray-400 to-gray-600'
                   }`}>
                   <span className="text-white text-lg font-medium">
                     {displayInfo.avatarLetter?.toUpperCase() || '?'}
@@ -441,8 +441,18 @@ export default function EmailView() {
                       <div>
                         <span className="text-xs text-gray-500">
                           Your role: {userRole}
-                          {/* eslint-disable-next-line react/no-unescaped-entities */}
-                          {userRole === "member" ? " (can reply)": userRole === "viewer" ?  "(view only)" : "(full access)"}
+                          {alias?.isCollaborative && userRole && (
+                            <div>
+                              <span className="text-xs text-gray-500">
+                                Your role: {userRole}
+                                {(() => {
+                                  if (userRole === "member") return " (can reply)";
+                                  if (userRole === "viewer") return " (view only)";
+                                  return " (full access)";
+                                })()}
+                              </span>
+                            </div>
+                          )}
                         </span>
 
                       </div>
@@ -539,8 +549,8 @@ export default function EmailView() {
                   <div
                     key={index}
                     className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${email.isSpam
-                        ? 'bg-red-50 border-red-200 opacity-75'
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      ? 'bg-red-50 border-red-200 opacity-75'
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                       }`}
                   >
                     <div className="flex-shrink-0">
@@ -557,8 +567,8 @@ export default function EmailView() {
                     </div>
                     <button
                       className={`flex-shrink-0 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded ${email.isSpam
-                          ? 'text-red-400 cursor-not-allowed'
-                          : 'text-blue-600 hover:text-blue-700 focus:ring-blue-500'
+                        ? 'text-red-400 cursor-not-allowed'
+                        : 'text-blue-600 hover:text-blue-700 focus:ring-blue-500'
                         }`}
                       onClick={() =>
                         email.isSpam
