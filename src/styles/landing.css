@@ -1,0 +1,407 @@
+/* Landing Page Styles - Integrated from Landing_page/style.css */
+
+.landing-page {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
+    background-color: black !important;
+    color: #e7e7e7 !important;
+    min-height: 100vh !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.landing-page * {
+    box-sizing: border-box !important;
+}
+
+.logo-img {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    height: 60px;
+    border-radius: 30%;
+    box-shadow: 0 0 10px rgba(127,66,167,0.15);
+    background: linear-gradient(135deg, #5300a0 0%, #7f42a7 100%);
+    padding: 4px;
+    object-fit: cover;
+    z-index: 1000;
+}
+
+/* gradient and blur image */
+.image-gradient{
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+.layer-blur{
+    height: 0;
+    width: 30rem;
+    position: absolute;
+    top: 20%;
+    right: 0;
+    box-shadow: 0 0 700px 15px white;
+    rotate: 30deg;
+    z-index: -1;
+}
+
+.landing-container{
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    overflow: hidden;
+
+}
+
+/* HEADER */
+.landing-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5rem;
+    z-index: 1000;
+    position: relative;
+}
+
+.landing-header h1{
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 300;
+
+}
+
+.landing-nav{
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin-left: -5%;
+}
+
+.landing-nav a{
+    font-size: 1rem;
+    letter-spacing: 0.1rem;
+    transition: color 0.2s ease;
+    text-decoration: none;
+    color: inherit
+
+}
+
+.landing-nav a:hover{
+    color: #a7a7a7
+
+}
+
+.btn-signing{
+    background-color: #a7a7a7;
+    color: black;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    position: relative;
+    z-index: 10;
+}
+
+.btn-signing:hover{
+    background-color: white;
+
+}
+
+/* main content */
+.landing-main{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(90vh - 6rem);
+
+}
+
+.landing-content{
+    max-width: 40rem;
+    margin-left: 10%;
+    z-index: 999;
+}
+.tag-box{
+    position: relative;
+    width: 18rem;
+    height: 2.5rem;
+    border-radius: 50px;
+    background: linear-gradient(to right, #656565, #7f42a7, #6600c5,#5300a0,#757575,#656565);
+    background-size: 200%;
+    animation: animationGradient 2.5s linear infinite;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+
+}
+
+@keyframes animationGradient{
+    to {
+        background-position: 200%;
+    }
+}
+
+.tag-box .tag{
+    position:absolute;
+    inset: 3px 3px 3px 3px;
+    background-color: black;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.5s ease;
+    cursor: pointer;
+}
+
+.tag-box .tag:hover{
+    color: #5300a0;
+
+}
+
+.landing-content h1{
+    font-size: 4rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin: 2rem 0;
+    line-height: 1.2;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.148);
+}
+
+.landing-description{
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+    max-width: 35rem;
+    color: gray;
+}
+
+.landing-button{
+    display: flex;
+    gap: 1rem;
+    margin-top: 3rem;
+}
+
+.btn-get-started{
+    text-decoration: none;
+    border: 1px solid #2a2a2a;
+    padding: 0.7rem 1.2rem;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    transition: background-color 0.2s ease;
+    color: inherit;
+}
+
+.btn-get-started:hover{
+    background-color: #1a1a1a;
+
+}
+
+.btn-signing-main{
+    text-decoration: none;
+    background-color: lightgray;
+    color: black;
+    padding: 0.6rem 2.5rem;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    transition: background-color 0.2s ease;
+
+}
+
+.btn-signing-main:hover{
+    background-color: gray;
+
+}
+
+.robot-3d{
+    position: absolute;
+    top: 0;
+    right: -30%;
+
+}
+
+@media (max-width: 768px){
+    .landing-header{
+        padding: 1rem 2rem;
+    }
+
+    .landing-nav{
+        gap: 1.5rem;
+    }
+
+    .landing-content{
+        margin-left: 5%;
+    }
+
+    .landing-content h1{
+        font-size: 2.5rem;
+        margin: 1rem 0;
+    }
+
+    .landing-description{
+        font-size: 1rem;
+        max-width: 20rem;
+    }
+
+    .robot-3d{
+        display: none;
+    }
+
+}
+
+/* ===== Extra Sections ===== */
+.section {
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 3rem;
+  text-shadow: 0 0 10px rgba(255,255,255,0.15);
+}
+
+/* Features */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.feature-box {
+  background: #111;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 20px rgba(255,255,255,0.05);
+  transition: transform 0.2s ease;
+}
+.feature-box:hover {
+  transform: translateY(-5px);
+}
+
+/* Trust */
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.trust-box {
+  background: #111;
+  padding: 2rem;
+  border-radius: 1rem;
+  font-style: italic;
+  box-shadow: 0 0 20px rgba(255,255,255,0.05);
+}
+
+/* FAQ */
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq-box {
+  background: #111;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 20px rgba(255,255,255,0.05);
+  text-align: left;
+}
+
+/* CTA */
+.cta {
+  background: linear-gradient(135deg, #5300a0, #7f42a7);
+  color: white;
+  border-radius: 1rem;
+  margin: 4rem auto;
+  max-width: 800px;
+  padding: 4rem 2rem;
+}
+.cta .btn-signing-main {
+  background: white;
+  color: black;
+  margin-top: 2rem;
+  display: inline-block;
+}
+
+/* Footer */
+.landing-footer {
+  padding: 2rem;
+  text-align: center;
+  color: gray;
+  border-top: 1px solid #222;
+}
+.footer-links a {
+  color: gray;
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+.footer-links a:hover {
+  color: white;
+}
+
+/* Auth Dropdown Styles */
+.auth-dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 100;
+}
+
+.auth-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #111;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(255,255,255,0.1);
+  padding: 0.5rem 0;
+  min-width: 150px;
+  z-index: 1001;
+  border: 1px solid #333;
+  margin-top: 0.5rem;
+}
+
+.auth-dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #e7e7e7;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.auth-dropdown-item:hover {
+  background-color: #333;
+  color: white;
+}
+
+/* Close dropdown when clicking outside */
+.auth-dropdown::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  display: none;
+}
+
+.auth-dropdown.show::after {
+  display: block;
+}
