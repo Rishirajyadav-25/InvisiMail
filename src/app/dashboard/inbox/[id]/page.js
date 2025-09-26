@@ -442,13 +442,13 @@ export default function EmailView() {
                         <span className="text-xs text-gray-500">
                           Your role: {userRole}
                           {alias?.isCollaborative && userRole && (
-  <div>
-    <span className="text-xs text-gray-500">
-      Your role: {userRole}
-      {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"}
-    </span>
-  </div>
-)}
+                          <div>
+                            <span className="text-xs text-gray-500">
+                              Your role: {userRole}
+                              {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"}
+                            </span>
+                          </div>
+                        )}
                         </span>
 
                       </div>
