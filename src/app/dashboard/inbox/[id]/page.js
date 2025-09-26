@@ -1,15 +1,15 @@
 // app/dashboard/inbox/[id]/page.js - Enhanced email view with spam information
-'use client';
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 
 export default function EmailView() {
   const [email, setEmail] = useState(null);
   const [user, setUser] = useState(null);
   const [alias, setAlias] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
   const params = useParams();
 
@@ -17,26 +17,26 @@ export default function EmailView() {
   const markAsRead = useCallback(async () => {
     try {
       await fetch(`/api/inbox/${params.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isRead: true }),
       });
     } catch (err) {
-      console.error('Error marking as read:', err);
+      console.error("Error marking as read:", err);
     }
   }, [params.id]);
 
   // Fetch user data
   const fetchUser = useCallback(async () => {
     try {
-      const response = await fetch('/api/user');
+      const response = await fetch("/api/user");
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
         return userData;
       }
     } catch (err) {
-      console.error('Error fetching user:', err);
+      console.error("Error fetching user:", err);
     }
     return null;
   }, []);
@@ -46,7 +46,7 @@ export default function EmailView() {
     if (!aliasEmail) return null;
 
     try {
-      const response = await fetch('/api/aliases');
+      const response = await fetch("/api/aliases");
       if (response.ok) {
         const aliases = await response.json();
         const foundAlias = aliases.find(a => a.aliasEmail === aliasEmail);
@@ -54,7 +54,7 @@ export default function EmailView() {
         return foundAlias;
       }
     } catch (err) {
-      console.error('Error fetching alias:', err);
+      console.error("Error fetching alias:", err);
     }
     return null;
   }, []);
@@ -68,7 +68,7 @@ export default function EmailView() {
     }
 
     try {
-      console.log('Fetching email with ID:', params.id);
+      console.log("Fetching email with ID:", params.id);
 
       const userData = await fetchUser();
 
@@ -76,7 +76,7 @@ export default function EmailView() {
 
       if (response.ok) {
         const emailData = await response.json();
-        console.log('Email data received:', emailData);
+        console.log("Email data received:", emailData);
         setEmail(emailData);
 
         if (emailData.aliasEmail) {
@@ -88,16 +88,16 @@ export default function EmailView() {
           await markAsRead();
         }
       } else if (response.status === 401) {
-        router.push('/signin');
+        router.push("/signin");
       } else if (response.status === 404) {
-        setError('Email not found. It may have been deleted or you may not have permission to view it.');
+        setError("Email not found. It may have been deleted or you may not have permission to view it.");
       } else {
         const errorData = await response.json().catch(() => ({}));
         setError(errorData.error || `Failed to load email (${response.status})`);
       }
     } catch (err) {
-      console.error('Error fetching email:', err);
-      setError('Network error while loading email. Please check your connection.');
+      console.error("Error fetching email:", err);
+      setError("Network error while loading email. Please check your connection.");
     }
     setLoading(false);
   }, [params.id, router, markAsRead, fetchUser, fetchAlias]);
@@ -109,60 +109,60 @@ export default function EmailView() {
 
   // Delete email
   const deleteEmail = async () => {
-    if (!confirm('Are you sure you want to delete this email? This action cannot be undone.')) return;
+    if (!confirm("Are you sure you want to delete this email? This action cannot be undone.")) return;
 
     try {
       const response = await fetch(`/api/inbox/${params.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
-        router.push('/dashboard/inbox');
+        router.push("/dashboard/inbox");
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`Failed to delete email: ${errorData.error || 'Unknown error'}`);
+        alert(`Failed to delete email: ${errorData.error || "Unknown error"}`);
       }
     } catch (err) {
-      console.error('Error deleting email:', err);
-      alert('Network error while deleting email');
+      console.error("Error deleting email:", err);
+      alert("Network error while deleting email");
     }
   };
 
   // Mark as spam/not spam
   const toggleSpamStatus = async (isSpam) => {
-    const action = isSpam ? 'mark as spam' : 'mark as not spam';
+    const action = isSpam ? "mark as spam" : "mark as not spam";
     if (!confirm(`Are you sure you want to ${action}?`)) return;
 
     try {
       const response = await fetch(`/api/inbox/${params.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isSpam }),
       });
 
       if (response.ok) {
         // Refresh the email data
         fetchEmail();
-        alert(`Email ${isSpam ? 'marked as spam' : 'marked as not spam'} successfully!`);
+        alert(`Email ${isSpam ? "marked as spam" : "marked as not spam"} successfully!`);
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`Failed to update spam status: ${errorData.error || 'Unknown error'}`);
+        alert(`Failed to update spam status: ${errorData.error || "Unknown error"}`);
       }
     } catch (err) {
-      console.error('Error updating spam status:', err);
-      alert('Network error while updating spam status');
+      console.error("Error updating spam status:", err);
+      alert("Network error while updating spam status");
     }
   };
 
   // Format date helper
   const formatFullDate = (dateString) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -170,7 +170,7 @@ export default function EmailView() {
   const canUserReply = () => {
     if (!email || !user || !alias) return false;
 
-    // Don't allow reply to sent emails or spam emails
+    // Don"t allow reply to sent emails or spam emails
     if (email.isSentEmail || email.isSpam) return false;
 
     // For personal aliases, owner can always reply
@@ -189,7 +189,7 @@ export default function EmailView() {
     );
 
     // Members can reply, viewers cannot
-    return collaborator && collaborator.role === 'member';
+    return collaborator && collaborator.role === "member";
   };
 
   // Determine email type and display properties
@@ -208,10 +208,10 @@ export default function EmailView() {
       isSpam,
       displayFrom: isSentEmail ? email.aliasEmail : email.from,
       displayTo: isSentEmail ? email.to : email.aliasEmail,
-      emailType: isSpam ? 'Spam' : isSentEmail ? 'Sent' : isReplyToSent ? 'Reply Received' : 'Received',
+      emailType: isSpam ? "Spam" : isSentEmail ? "Sent" : isReplyToSent ? "Reply Received" : "Received",
       avatarLetter: isSentEmail ?
-        (email.to?.charAt(0) || 'T') :
-        (email.from?.charAt(0) || 'F'),
+        (email.to?.charAt(0) || "T") :
+        (email.from?.charAt(0) || "F"),
       canReply: canUserReply()
     };
   };
@@ -221,7 +221,7 @@ export default function EmailView() {
     if (!user || !alias) return null;
 
     if (alias.ownerId?.toString() === user._id?.toString()) {
-      return 'owner';
+      return "owner";
     }
 
     const collaborator = alias.collaborators?.find(
@@ -234,12 +234,12 @@ export default function EmailView() {
   // Get spam level color
   const getSpamLevelColor = (spamLevel) => {
     switch (spamLevel) {
-      case 'high':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case "high":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-orange-100 text-orange-800 border-orange-200";
       default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
     }
   };
 
@@ -321,16 +321,16 @@ export default function EmailView() {
               </Link>
               <div className="h-6 w-px bg-gray-300"></div>
               <h1 className="text-xl font-semibold text-gray-900 truncate">
-                {email.subject || '(No Subject)'}
+                {email.subject || "(No Subject)"}
               </h1>
               {/* Email type badge */}
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${displayInfo.isSpam
-                ? 'bg-red-100 text-red-800'
+                ? "bg-red-100 text-red-800"
                 : displayInfo.isSentEmail
-                  ? 'bg-blue-100 text-blue-800'
+                  ? "bg-blue-100 text-blue-800"
                   : displayInfo.isReplyToSent
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-800"
                 }`}>
                 {displayInfo.emailType}
               </span>
@@ -356,7 +356,7 @@ export default function EmailView() {
                 <div className="flex-1">
                   <h3 className="font-medium">Spam Email Detected</h3>
                   <p className="text-sm mt-1">
-                    This email was identified as spam by Mailgun's filtering system
+                    This email was identified as spam by Mailgun"s filtering system
                     {email.spamScore && ` (Score: ${email.spamScore.toFixed(1)}/${email.spamThreshold})`}.
                     Exercise caution when interacting with this content.
                   </p>
@@ -377,33 +377,33 @@ export default function EmailView() {
               <div className="flex items-start space-x-4">
                 {/* Avatar with appropriate letter and color for spam */}
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${displayInfo.isSpam
-                  ? 'bg-gradient-to-br from-red-400 to-red-600'
+                  ? "bg-gradient-to-br from-red-400 to-red-600"
                   : displayInfo.isSentEmail
-                    ? 'bg-gradient-to-br from-blue-400 to-blue-600'
+                    ? "bg-gradient-to-br from-blue-400 to-blue-600"
                     : displayInfo.isReplyToSent
-                      ? 'bg-gradient-to-br from-green-400 to-green-600'
-                      : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                      ? "bg-gradient-to-br from-green-400 to-green-600"
+                      : "bg-gradient-to-br from-gray-400 to-gray-600"
                   }`}>
                   <span className="text-white text-lg font-medium">
-                    {displayInfo.avatarLetter?.toUpperCase() || '?'}
+                    {displayInfo.avatarLetter?.toUpperCase() || "?"}
                   </span>
                 </div>
 
                 {/* Details */}
                 <div className="min-w-0 flex-1">
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    {email.subject || '(No Subject)'}
+                    {email.subject || "(No Subject)"}
                   </h2>
                   <div className="space-y-1 text-sm text-gray-600">
                     <div>
-                      <span className="font-medium text-gray-700">From:</span> {displayInfo.displayFrom || 'Unknown'}
+                      <span className="font-medium text-gray-700">From:</span> {displayInfo.displayFrom || "Unknown"}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">To:</span> {displayInfo.displayTo || 'Unknown'}
+                      <span className="font-medium text-gray-700">To:</span> {displayInfo.displayTo || "Unknown"}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">Date:</span>{' '}
-                      {email.receivedAt ? formatFullDate(email.receivedAt) : 'Unknown'}
+                      <span className="font-medium text-gray-700">Date:</span>{" "}
+                      {email.receivedAt ? formatFullDate(email.receivedAt) : "Unknown"}
                     </div>
                     {/* Show sender info for sent emails */}
                     {displayInfo.isSentEmail && email.senderName && (
@@ -415,16 +415,16 @@ export default function EmailView() {
                     {email.isSpam && (
                       <div className="mt-2 space-y-1">
                         <div>
-                          <span className="font-medium text-gray-700">Spam Score:</span> {email.spamScore?.toFixed(1) || 'Unknown'} / {email.spamThreshold || '5.0'}
+                          <span className="font-medium text-gray-700">Spam Score:</span> {email.spamScore?.toFixed(1) || "Unknown"} / {email.spamThreshold || "5.0"}
                         </div>
                         <div>
                           <span className="font-medium text-gray-700">Spam Level:</span>
-                          <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getSpamLevelColor(email.spamLevel).replace('border-', 'border ')}`}>
-                            {email.spamLevel || 'Unknown'}
+                          <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getSpamLevelColor(email.spamLevel).replace("border-", "border ")}`}>
+                            {email.spamLevel || "Unknown"}
                           </span>
                         </div>
                         <div>
-                          <span className="font-medium text-gray-700">Mailgun Result:</span> {email.spamResult || 'Unknown'}
+                          <span className="font-medium text-gray-700">Mailgun Result:</span> {email.spamResult || "Unknown"}
                         </div>
                       </div>
                     )}
@@ -445,7 +445,7 @@ export default function EmailView() {
                           <div>
                             <span className="text-xs text-gray-500">
                               Your role: {userRole}
-                              {/* {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"} */}
+                              {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"}
                             </span>
                           </div>
                         )}
@@ -455,9 +455,9 @@ export default function EmailView() {
                     )}
                     {email.attachments?.length > 0 && (
                       <div>
-                        <span className="font-medium text-gray-700">Attachments:</span>{' '}
+                        <span className="font-medium text-gray-700">Attachments:</span>{" "}
                         {email.attachments.length} file
-                        {email.attachments.length > 1 ? 's' : ''}
+                        {email.attachments.length > 1 ? "s" : ""}
                       </div>
                     )}
                     {email.isForwarded && (
@@ -519,12 +519,12 @@ export default function EmailView() {
 
             {email.bodyHtml ? (
               <div
-                className={`prose max-w-none text-gray-700 leading-relaxed ${email.isSpam ? 'opacity-75' : ''}`}
+                className={`prose max-w-none text-gray-700 leading-relaxed ${email.isSpam ? "opacity-75" : ""}`}
                 dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
               />
             ) : (
-              <div className={`whitespace-pre-wrap text-gray-700 leading-relaxed font-mono text-sm bg-gray-50 p-4 rounded-md border ${email.isSpam ? 'opacity-75' : ''}`}>
-                {email.bodyPlain || 'No email content available.'}
+              <div className={`whitespace-pre-wrap text-gray-700 leading-relaxed font-mono text-sm bg-gray-50 p-4 rounded-md border ${email.isSpam ? "opacity-75" : ""}`}>
+                {email.bodyPlain || "No email content available."}
               </div>
             )}
           </div>
@@ -545,8 +545,8 @@ export default function EmailView() {
                   <div
                     key={index}
                     className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${email.isSpam
-                      ? 'bg-red-50 border-red-200 opacity-75'
-                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      ? "bg-red-50 border-red-200 opacity-75"
+                      : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                       }`}
                   >
                     <div className="flex-shrink-0">
@@ -557,23 +557,23 @@ export default function EmailView() {
                         {attachment.filename || `Attachment ${index + 1}`}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {attachment.contentType || 'Unknown type'}
+                        {attachment.contentType || "Unknown type"}
                         {attachment.size && ` • ${Math.round(attachment.size / 1024)} KB`}
                       </p>
                     </div>
                     <button
                       className={`flex-shrink-0 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded ${email.isSpam
-                        ? 'text-red-400 cursor-not-allowed'
-                        : 'text-blue-600 hover:text-blue-700 focus:ring-blue-500'
+                        ? "text-red-400 cursor-not-allowed"
+                        : "text-blue-600 hover:text-blue-700 focus:ring-blue-500"
                         }`}
                       onClick={() =>
                         email.isSpam
-                          ? alert('Cannot download attachments from spam emails for security reasons.')
-                          : alert('Download functionality would be implemented here with proper file serving.')
+                          ? alert("Cannot download attachments from spam emails for security reasons.")
+                          : alert("Download functionality would be implemented here with proper file serving.")
                       }
                       disabled={email.isSpam}
                     >
-                      {email.isSpam ? 'Blocked' : 'Download'}
+                      {email.isSpam ? "Blocked" : "Download"}
                     </button>
                   </div>
                 ))}
@@ -591,51 +591,51 @@ export default function EmailView() {
                 <strong>Email ID:</strong> {email._id}
               </div>
               <div>
-                <strong>User Role:</strong> {userRole || 'Unknown'}
+                <strong>User Role:</strong> {userRole || "Unknown"}
               </div>
               <div>
-                <strong>Can Reply:</strong> {displayInfo.canReply ? 'Yes' : 'No'}
+                <strong>Can Reply:</strong> {displayInfo.canReply ? "Yes" : "No"}
               </div>
               <div>
-                <strong>Is Collaborative:</strong> {alias?.isCollaborative ? 'Yes' : 'No'}
+                <strong>Is Collaborative:</strong> {alias?.isCollaborative ? "Yes" : "No"}
               </div>
               <div>
-                <strong>Message ID:</strong> {email.messageId || 'N/A'}
+                <strong>Message ID:</strong> {email.messageId || "N/A"}
               </div>
               <div>
                 <strong>User ID:</strong> {email.userId} ({typeof email.userId})
               </div>
               <div>
-                <strong>Alias ID:</strong> {email.aliasId || 'N/A'}
+                <strong>Alias ID:</strong> {email.aliasId || "N/A"}
               </div>
               <div>
                 <strong>Email Type:</strong> {displayInfo.emailType}
               </div>
               <div>
-                <strong>Is Sent Email:</strong> {displayInfo.isSentEmail ? 'Yes' : 'No'}
+                <strong>Is Sent Email:</strong> {displayInfo.isSentEmail ? "Yes" : "No"}
               </div>
               <div>
-                <strong>Is Reply to Sent:</strong> {displayInfo.isReplyToSent ? 'Yes' : 'No'}
+                <strong>Is Reply to Sent:</strong> {displayInfo.isReplyToSent ? "Yes" : "No"}
               </div>
               <div>
-                <strong>Is Reverse Alias:</strong> {displayInfo.isReverseAlias ? 'Yes' : 'No'}
+                <strong>Is Reverse Alias:</strong> {displayInfo.isReverseAlias ? "Yes" : "No"}
               </div>
               <div>
-                <strong>Is Spam:</strong> {email.isSpam ? 'Yes' : 'No'}
+                <strong>Is Spam:</strong> {email.isSpam ? "Yes" : "No"}
               </div>
               {email.isSpam && (
                 <>
                   <div>
-                    <strong>Spam Score:</strong> {email.spamScore || 'N/A'}
+                    <strong>Spam Score:</strong> {email.spamScore || "N/A"}
                   </div>
                   <div>
-                    <strong>Spam Threshold:</strong> {email.spamThreshold || 'N/A'}
+                    <strong>Spam Threshold:</strong> {email.spamThreshold || "N/A"}
                   </div>
                   <div>
-                    <strong>Spam Level:</strong> {email.spamLevel || 'N/A'}
+                    <strong>Spam Level:</strong> {email.spamLevel || "N/A"}
                   </div>
                   <div>
-                    <strong>Mailgun Spam Result:</strong> {email.spamResult || 'N/A'}
+                    <strong>Mailgun Spam Result:</strong> {email.spamResult || "N/A"}
                   </div>
                 </>
               )}
@@ -650,13 +650,13 @@ export default function EmailView() {
                 </div>
               )}
               <div>
-                <strong>Forwarded:</strong> {email.isForwarded ? 'Yes' : 'No'}
+                <strong>Forwarded:</strong> {email.isForwarded ? "Yes" : "No"}
                 {email.isForwarded && email.forwardedAt && (
                   <span> at {formatFullDate(email.forwardedAt)}</span>
                 )}
               </div>
               <div>
-                <strong>Read Status:</strong> {email.isRead ? 'Read' : 'Unread'}
+                <strong>Read Status:</strong> {email.isRead ? "Read" : "Unread"}
                 {email.isRead && email.readAt && (
                   <span> at {formatFullDate(email.readAt)}</span>
                 )}
@@ -692,11 +692,11 @@ export default function EmailView() {
             </button>
             <button
               onClick={() => {
-                const emailText = `From: ${displayInfo.displayFrom}\nTo: ${displayInfo.displayTo}\nSubject: ${email.subject}\nDate: ${formatFullDate(email.receivedAt)}\nType: ${displayInfo.emailType}\n${email.isSpam ? `Spam Score: ${email.spamScore}/${email.spamThreshold}\n` : ''}\n${email.bodyPlain}`;
+                const emailText = `From: ${displayInfo.displayFrom}\nTo: ${displayInfo.displayTo}\nSubject: ${email.subject}\nDate: ${formatFullDate(email.receivedAt)}\nType: ${displayInfo.emailType}\n${email.isSpam ? `Spam Score: ${email.spamScore}/${email.spamThreshold}\n` : ""}\n${email.bodyPlain}`;
                 navigator.clipboard.writeText(emailText).then(() => {
-                  alert('Email content copied to clipboard!');
+                  alert("Email content copied to clipboard!");
                 }).catch(() => {
-                  alert('Failed to copy email content');
+                  alert("Failed to copy email content");
                 });
               }}
               className="text-gray-600 hover:text-gray-700 font-medium"
