@@ -1,6 +1,6 @@
 // src/app/dashboard/send/page.jsx
 import { Suspense } from 'react';
-import SendEmail from './SendEmail'; // Import the client component
+import SendEmail from './sendEmail.js'; // Import the client component
 
 export default function SendEmailPage() {
   return (
