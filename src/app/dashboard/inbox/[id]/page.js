@@ -1,4 +1,3 @@
-// app/dashboard/inbox/[id]/page.js - Enhanced email view with spam information
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -445,12 +444,11 @@ export default function EmailView() {
                           <div>
                             <span className="text-xs text-gray-500">
                               Your role: {userRole}
-                              {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"}
+                              {userRole === 'member' ? ' (can reply)' : userRole === 'viewer' ? ' (view only)' : ' (full access)'}
                             </span>
                           </div>
                         )}
                         </span>
-
                       </div>
                     )}
                     {email.attachments?.length > 0 && (
@@ -691,18 +689,18 @@ export default function EmailView() {
               Print
             </button>
             <button
-  onClick={() => {
-    const emailText = `From: ${displayInfo.displayFrom}\nTo: ${displayInfo.displayTo}\nSubject: ${email.subject}\nDate: ${formatFullDate(email.receivedAt)}\nType: ${displayInfo.emailType}\n${email.isSpam ? `Spam Score: ${email.spamScore}/${email.spamThreshold}\n` : ''}\n${email.bodyPlain}`;
-    navigator.clipboard.writeText(emailText).then(() => {
-      alert(`Email content copied to clipboard!`);
-    }).catch(() => {
-      alert(`Failed to copy email content`);
-    });
-  }}
-  className="text-gray-600 hover:text-gray-700 font-medium"
->
-  Copy Text
-</button>
+              onClick={() => {
+                const emailText = `From: ${displayInfo.displayFrom}\nTo: ${displayInfo.displayTo}\nSubject: ${email.subject}\nDate: ${formatFullDate(email.receivedAt)}\nType: ${displayInfo.emailType}\n${email.isSpam ? `Spam Score: ${email.spamScore}/${email.spamThreshold}\n` : ''}\n${email.bodyPlain}`;
+                navigator.clipboard.writeText(emailText).then(() => {
+                  alert('Email content copied to clipboard!');
+                }).catch(() => {
+                  alert('Failed to copy email content');
+                });
+              }}
+              className="text-gray-600 hover:text-gray-700 font-medium"
+            >
+              Copy Text
+            </button>
           </div>
         </div>
       </div>
