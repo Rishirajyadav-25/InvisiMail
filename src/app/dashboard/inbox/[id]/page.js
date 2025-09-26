@@ -445,7 +445,7 @@ export default function EmailView() {
                           <div>
                             <span className="text-xs text-gray-500">
                               Your role: {userRole}
-                              {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"}
+                              {/* {userRole === "member" ? " (can reply)" : userRole === "viewer" ? " (view only)" : " (full access)"} */}
                             </span>
                           </div>
                         )}
