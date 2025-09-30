@@ -43,11 +43,13 @@ export async function POST(request) {
       { status: 200 }
     );
 
-    // Set HTTP-only cookie
+  // Set HTTP-only cookie
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 // 7 days
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/'
     });
 
     return response;

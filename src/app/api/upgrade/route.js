@@ -78,7 +78,7 @@ export async function POST(request) {
 
     console.log('📦 Creating Razorpay order with options:', orderOptions);
     
-    const order = await razorpay.orders.create(orderOptions);
+    const order = razorpay.orders.create(orderOptions);
     console.log('✅ Razorpay order created:', { id: order.id, amount: order.amount, currency: order.currency });
 
     // Store payment record in database
