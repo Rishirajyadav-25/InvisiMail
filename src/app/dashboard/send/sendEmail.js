@@ -27,6 +27,23 @@ export default function SendEmail() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+      const fetchReplyData = async (emailId) => {
+    try {
+      const response = await fetch(`/api/inbox/${emailId}`);
+      if (response.ok) {
+        const email = await response.json();
+        setSelectedAlias(email.aliasEmail);
+        setFormData({
+          to: email.from,
+          subject: email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`,
+          message: `\n\n--- Original Message ---\nFrom: ${email.from}\nTo: ${email.aliasEmail}\nSubject: ${email.subject}\n\n${email.bodyPlain}`
+        });
+        await handleAIAssist(email._id, 'enhance');
+      }
+    } catch (error) {
+      console.error('Error fetching reply data:', error);
+    }
+  };
     fetchUser();
     fetchAliases();
     const aliasFromQuery = searchParams.get('alias');
@@ -39,7 +56,7 @@ export default function SendEmail() {
     if (replyToId) {
       fetchReplyData(replyToId);
     }
-  }, [searchParams,fetchReplyData]);
+  }, [searchParams]);
 
   const fetchUser = async () => {
     try {
@@ -64,23 +81,23 @@ export default function SendEmail() {
     }
   };
 
-  const fetchReplyData = async (emailId) => {
-    try {
-      const response = await fetch(`/api/inbox/${emailId}`);
-      if (response.ok) {
-        const email = await response.json();
-        setSelectedAlias(email.aliasEmail);
-        setFormData({
-          to: email.from,
-          subject: email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`,
-          message: `\n\n--- Original Message ---\nFrom: ${email.from}\nTo: ${email.aliasEmail}\nSubject: ${email.subject}\n\n${email.bodyPlain}`
-        });
-        await handleAIAssist(email._id, 'enhance');
-      }
-    } catch (error) {
-      console.error('Error fetching reply data:', error);
-    }
-  };
+  // const fetchReplyData = async (emailId) => {
+  //   try {
+  //     const response = await fetch(`/api/inbox/${emailId}`);
+  //     if (response.ok) {
+  //       const email = await response.json();
+  //       setSelectedAlias(email.aliasEmail);
+  //       setFormData({
+  //         to: email.from,
+  //         subject: email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`,
+  //         message: `\n\n--- Original Message ---\nFrom: ${email.from}\nTo: ${email.aliasEmail}\nSubject: ${email.subject}\n\n${email.bodyPlain}`
+  //       });
+  //       await handleAIAssist(email._id, 'enhance');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching reply data:', error);
+  //   }
+  // };
 
   const handleAIAssist = async (emailId, mode = 'enhance') => {
     setAiLoading(true);
