@@ -1,4 +1,4 @@
-// src/app/api/webhooks/razorpay/route.js - FIXED VERSION
+// src/app/api/webhooks/razorpay/route.js - FULLY FIXED VERSION
 import { NextResponse } from 'next/server';
 import clientPromise from '../../../../lib/mongodb.js';
 import crypto from 'crypto';
@@ -40,29 +40,34 @@ export async function POST(request) {
     if (event === 'payment.captured') {
       const paymentEntity = payload.payload.payment.entity;
       const orderId = paymentEntity.order_id;
-      const userId = paymentEntity.notes?.userId;
       const paymentId = paymentEntity.id;
       const amount = paymentEntity.amount;
 
       console.log('💳 Payment Details:', { 
         orderId, 
-        userId, 
         paymentId, 
         amount,
         notes: paymentEntity.notes 
       });
 
-      if (!userId || !orderId) {
-        console.error('🔴 Missing critical data in webhook payload', { 
-          userId, 
-          orderId, 
-          notes: paymentEntity.notes 
-        });
+      if (!orderId) {
+        console.error('🔴 Missing orderId in webhook payload');
         return NextResponse.json({ error: 'Invalid payload data' }, { status: 400 });
       }
 
       const client = await clientPromise;
       const db = client.db();
+
+      // ✅ FIX: Lookup userId from payments collection using orderId
+      const paymentRecord = await db.collection('payments').findOne({ orderId: orderId });
+      
+      if (!paymentRecord) {
+        console.error('🔴 Payment record not found for orderId:', orderId);
+        return NextResponse.json({ error: 'Payment record not found' }, { status: 404 });
+      }
+
+      const userId = paymentRecord.userId;
+      console.log('✅ Found userId from payment record:', userId);
 
       // ENHANCED: Use transaction for atomic updates
       const session = client.startSession();

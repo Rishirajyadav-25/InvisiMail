@@ -1,4 +1,4 @@
-// src/app/api/upgrade/route.js
+// src/app/api/upgrade/route.js - FIXED VERSION
 import { NextResponse } from 'next/server';
 import clientPromise from '../../../lib/mongodb';
 import { verifyToken } from '../../../lib/auth';
@@ -78,10 +78,11 @@ export async function POST(request) {
 
     console.log('📦 Creating Razorpay order with options:', orderOptions);
     
-    const order = razorpay.orders.create(orderOptions);
+    // ✅ FIX: Add await here
+    const order = await razorpay.orders.create(orderOptions);
     console.log('✅ Razorpay order created:', { id: order.id, amount: order.amount, currency: order.currency });
 
-    // Store payment record in database
+    // Store payment record in database with userId for webhook lookup
     const paymentRecord = {
       userId: new ObjectId(decoded.userId),
       orderId: order.id,
@@ -96,7 +97,8 @@ export async function POST(request) {
         id: order.id,
         amount: order.amount,
         currency: order.currency,
-        receipt: order.receipt
+        receipt: order.receipt,
+        notes: order.notes
       }
     };
 
