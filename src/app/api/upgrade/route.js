@@ -1,4 +1,4 @@
-// src/app/api/upgrade/route.js - FIXED VERSION
+// src/app/api/upgrade/route.js - CORRECT VERSION
 import { NextResponse } from 'next/server';
 import clientPromise from '../../../lib/mongodb';
 import { verifyToken } from '../../../lib/auth';
@@ -7,6 +7,7 @@ import Razorpay from 'razorpay';
 
 // Validate Razorpay configuration
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.error('CRITICAL: Razorpay credentials not configured');
   throw new Error('Razorpay credentials not configured in environment variables');
 }
 
@@ -16,52 +17,57 @@ const razorpay = new Razorpay({
 });
 
 export async function POST(request) {
+  const logPrefix = '[Create Order]';
+  
   try {
-    console.log('🚀 Upgrade request initiated');
+    console.log(`${logPrefix} Upgrade request initiated`);
 
     const token = request.cookies.get('token')?.value;
     
     if (!token) {
-      console.error('❌ No authentication token provided');
+      console.error(`${logPrefix} No authentication token`);
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const decoded = verifyToken(token);
-    console.log('✅ Token verified for user:', decoded.userId);
+    console.log(`${logPrefix} User authenticated: ${decoded.userId}`);
 
     const client = await clientPromise;
     const db = client.db();
 
-    // Fetch user with fresh data
+    // Fetch user
     const user = await db.collection('users').findOne({ 
       _id: new ObjectId(decoded.userId) 
     });
 
     if (!user) {
-      console.error('❌ User not found:', decoded.userId);
+      console.error(`${logPrefix} User not found: ${decoded.userId}`);
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    console.log('👤 User found:', { id: user._id, email: user.email, plan: user.plan });
+    console.log(`${logPrefix} User found:`, { 
+      email: user.email, 
+      currentPlan: user.plan 
+    });
 
-    // Check if user is already Pro
+    // Check if already Pro
     if (user.plan === 'pro') {
-      console.log('⚠️ User already has Pro plan');
+      console.log(`${logPrefix} User already Pro`);
       return NextResponse.json({ error: 'User is already on Pro plan' }, { status: 400 });
     }
 
-    // Generate unique receipt ID (under 40 characters)
+    // Get amount
+    const amountInRupees = Number(process.env.RAZORPAY_PRO_AMOUNT_RUPEES || 499);
+    const amountInPaise = amountInRupees * 100;
+
+    console.log(`${logPrefix} Amount: ₹${amountInRupees} (${amountInPaise} paise)`);
+
+    // Generate receipt ID
     const timestamp = Date.now().toString().slice(-8);
     const userIdShort = user._id.toString().slice(-8);
     const receiptId = `pro_${userIdShort}_${timestamp}`;
     
-    console.log('🧾 Generated receipt ID:', receiptId);
-
-    // Get amount from environment or default
-    const amountInRupees = Number(process.env.RAZORPAY_PRO_AMOUNT_RUPEES || 499);
-    const amountInPaise = amountInRupees * 100;
-
-    console.log('💰 Payment amount:', { amountInRupees, amountInPaise });
+    console.log(`${logPrefix} Receipt ID: ${receiptId}`);
 
     // Create Razorpay order
     const orderOptions = {
@@ -76,13 +82,18 @@ export async function POST(request) {
       }
     };
 
-    console.log('📦 Creating Razorpay order with options:', orderOptions);
+    console.log(`${logPrefix} Creating Razorpay order...`);
     
-    // ✅ FIX: Add await here
+    // IMPORTANT: await the order creation
     const order = await razorpay.orders.create(orderOptions);
-    console.log('✅ Razorpay order created:', { id: order.id, amount: order.amount, currency: order.currency });
+    
+    console.log(`${logPrefix} Razorpay order created successfully:`, {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency
+    });
 
-    // Store payment record in database with userId for webhook lookup
+    // Store payment record in database
     const paymentRecord = {
       userId: new ObjectId(decoded.userId),
       orderId: order.id,
@@ -103,7 +114,7 @@ export async function POST(request) {
     };
 
     const insertResult = await db.collection('payments').insertOne(paymentRecord);
-    console.log('💾 Payment record created:', insertResult.insertedId);
+    console.log(`${logPrefix} Payment record saved:`, insertResult.insertedId);
 
     // Return order details for frontend
     const responseData = {
@@ -119,21 +130,18 @@ export async function POST(request) {
       }
     };
 
-    console.log('📤 Sending response:', responseData);
+    console.log(`${logPrefix} Sending response to frontend`);
 
     return NextResponse.json(responseData, { status: 200 });
 
   } catch (error) {
-    console.error('🔴 Upgrade API Error Details:');
-    console.error('- Error message:', error.message);
-    console.error('- Error code:', error.code);
-    console.error('- Error description:', error.description);
-    console.error('- Full error:', error);
+    console.error(`${logPrefix} ERROR:`, error.message);
+    console.error(`${logPrefix} Stack:`, error.stack);
     
     // Handle specific Razorpay errors
     if (error.error && error.error.code) {
       const razorpayError = error.error;
-      console.error('🔴 Razorpay specific error:', razorpayError);
+      console.error(`${logPrefix} Razorpay error:`, razorpayError);
       
       return NextResponse.json({
         error: `Payment system error: ${razorpayError.description || razorpayError.code}`,
@@ -143,7 +151,6 @@ export async function POST(request) {
     
     // Handle database errors
     if (error.name === 'MongoError') {
-      console.error('🔴 Database error:', error.message);
       return NextResponse.json({
         error: 'Database error occurred. Please try again.'
       }, { status: 500 });
@@ -151,7 +158,6 @@ export async function POST(request) {
 
     // Handle authentication errors
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      console.error('🔴 Authentication error:', error.message);
       return NextResponse.json({
         error: 'Authentication failed. Please login again.'
       }, { status: 401 });

@@ -1,10 +1,9 @@
-// src/app/dashboard/page.jsx - ENHANCED VERSION WITH PAYMENT SUCCESS HANDLING
+// src/app/dashboard/page.jsx - WITH FALLBACK VERIFICATION
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiMail, FiInbox, FiSend } from 'react-icons/fi';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 import StatsCard from '@/components/StatsCard';
 import RecentActivity from '@/components/RecentActivity';
 import ChartCard from '@/components/ChartCard';
@@ -20,6 +19,8 @@ export default function Dashboard() {
   const [success, setSuccess] = useState('');
   const [inboxStats, setInboxStats] = useState({ unreadCount: 0, totalEmails: 0, spamCount: 0 });
   const [refreshing, setRefreshing] = useState(false);
+  const [pollingAttempts, setPollingAttempts] = useState(0);
+  const [useWebhook, setUseWebhook] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,8 +30,16 @@ export default function Dashboard() {
       setRefreshing(true);
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Poll for user plan update
+      // Try webhook-based polling first
       pollForPlanUpdate();
+      
+      // After 15 seconds, try direct API verification as fallback
+      setTimeout(() => {
+        if (user?.plan !== 'pro') {
+          console.log('[Fallback] Switching to direct API verification');
+          verifyPaymentDirectly();
+        }
+      }, 15000);
     } else {
       fetchUserData();
     }
@@ -39,10 +48,60 @@ export default function Dashboard() {
     fetchActivities();
   }, []);
 
-  // Enhanced polling function for plan updates
-  const pollForPlanUpdate = async (maxAttempts = 15, attemptCount = 0) => {
+  // Direct API verification (fallback method)
+  const verifyPaymentDirectly = async () => {
     try {
-      const response = await fetch('/api/user', { 
+      console.log('[Fallback] Attempting direct payment verification');
+      setSuccess('Using alternative verification method...');
+      
+      const response = await fetch('/api/upgrade/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.user?.plan === 'pro') {
+          console.log('[Fallback] ✅ Successfully verified via API');
+          setUser(data.user);
+          setSuccess('🎉 Successfully upgraded to Pro! Welcome to the Pro plan.');
+          setRefreshing(false);
+          setUseWebhook(false);
+          fetchAliases();
+          fetchInboxStats();
+          return true;
+        } else {
+          console.log('[Fallback] Payment not yet captured:', data.message);
+          
+          // Try again after 5 seconds, up to 3 times
+          if (pollingAttempts < 20) {
+            setTimeout(verifyPaymentDirectly, 5000);
+          } else {
+            setError('Unable to verify payment. Please contact support with your order details.');
+            setRefreshing(false);
+          }
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('[Fallback] Error:', error);
+      return false;
+    }
+  };
+
+  // Webhook-based polling (primary method)
+  const pollForPlanUpdate = async (maxAttempts = 10, attemptCount = 0) => {
+    if (!useWebhook) return; // Stop if fallback is active
+    
+    setPollingAttempts(attemptCount + 1);
+    
+    try {
+      console.log(`[Polling] Attempt ${attemptCount + 1}/${maxAttempts}`);
+      
+      const timestamp = Date.now();
+      const response = await fetch(`/api/user?t=${timestamp}`, { 
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -52,55 +111,54 @@ export default function Dashboard() {
       
       if (response.ok) {
         const userData = await response.json();
+        console.log(`[Polling] User data:`, { plan: userData.plan, email: userData.email });
+        
         setUser(userData);
         
         if (userData.plan === 'pro') {
-          setSuccess('🎉 Successfully upgraded to Pro! Welcome to the Pro plan.');
+          setSuccess('🎉 Successfully upgraded to Pro!');
           setRefreshing(false);
-          // Refresh other data to show Pro features
           fetchAliases();
           fetchInboxStats();
+          console.log('[Polling] ✅ Success');
           return;
         }
       }
       
-      // If not pro yet and we haven't reached max attempts
       if (attemptCount < maxAttempts) {
         setTimeout(() => {
           pollForPlanUpdate(maxAttempts, attemptCount + 1);
-        }, 2000); // Check every 2 seconds
+        }, 3000);
       } else {
-        // Max attempts reached
-        setRefreshing(false);
-        setError('Plan upgrade verification taking longer than expected. Please refresh the page or contact support if the issue persists.');
-        fetchUserData(); // Fallback to regular fetch
+        console.log('[Polling] Max attempts reached, switching to fallback');
+        // Don't stop refreshing yet, let fallback take over
       }
       
     } catch (error) {
-      console.error('Error polling for plan update:', error);
+      console.error('[Polling] Error:', error);
+      
       if (attemptCount < maxAttempts) {
         setTimeout(() => {
           pollForPlanUpdate(maxAttempts, attemptCount + 1);
-        }, 2000);
-      } else {
-        setRefreshing(false);
-        setError('Failed to verify plan upgrade. Please refresh the page.');
-        fetchUserData();
+        }, 3000);
       }
     }
   };
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('/api/user', {
+      const timestamp = Date.now();
+      const response = await fetch(`/api/user?t=${timestamp}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache'
         }
       });
+      
       if (response.ok) {
         const userData = await response.json();
+        console.log('[Fetch] User data:', { plan: userData.plan });
         setUser(userData);
       } else {
         router.push('/signin');
@@ -187,38 +245,27 @@ export default function Dashboard() {
           amount: order.amount,
           currency: order.currency,
           name: 'Email Alias Pro',
-          description: 'Upgrade to Pro Plan - Unlimited aliases & collaboration',
+          description: 'Upgrade to Pro Plan',
           order_id: order.id,
           handler: function (response) {
             console.log('Payment successful:', response);
-            // Set success state and start polling
-            setSuccess('Payment successful! Upgrading your account...');
-            setRefreshing(true);
-            // Redirect with upgrade flag
             window.location.href = '/dashboard?upgraded=true';
           },
           prefill: {
             email: userInfo?.email || user?.email,
             name: userInfo?.name || user?.name
           },
-          theme: {
-            color: '#3B82F6'
-          },
+          theme: { color: '#3B82F6' },
           modal: {
             ondismiss: function () {
-              setError('Payment cancelled. You can try again anytime.');
+              setError('Payment cancelled.');
             }
-          },
-          notes: {
-            upgrade: 'pro_plan',
-            user_id: user?._id
           }
         };
         
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response) {
           setError(`Payment failed: ${response.error.description}`);
-          console.error('Payment failed:', response.error);
         });
         rzp.open();
       } else {
@@ -231,18 +278,32 @@ export default function Dashboard() {
     }
   };
 
+  const handleManualRefresh = () => {
+    setError('');
+    setSuccess('Checking your payment status...');
+    verifyPaymentDirectly();
+  };
+
   if (loading || refreshing) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">
+          <p className="text-gray-600 font-medium">
             {refreshing ? 'Verifying your Pro plan upgrade...' : 'Loading...'}
           </p>
           {refreshing && (
-            <p className="text-sm text-gray-500 mt-2">
-              This may take a few moments
-            </p>
+            <>
+              <p className="text-sm text-gray-500 mt-2">
+                {useWebhook ? 'Checking with payment gateway...' : 'Using direct verification...'}
+              </p>
+              <button
+                onClick={handleManualRefresh}
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+              >
+                Verify Now
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -256,30 +317,44 @@ export default function Dashboard() {
       <Sidebar user={user} onUpgrade={handleUpgrade} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* <Header user={user} /> */}
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
-              <button 
-                onClick={() => setError('')} 
-                className="float-right text-red-500 hover:text-red-700"
-              >
-                ×
-              </button>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md flex items-start justify-between">
+              <div className="flex-1">
+                <p className="font-medium">Error</p>
+                <p className="text-sm mt-1">{error}</p>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleManualRefresh}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                >
+                  Verify Payment
+                </button>
+                <button 
+                  onClick={() => setError('')} 
+                  className="text-red-500 hover:text-red-700 text-lg font-bold"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           )}
           {success && (
-            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-              {success}
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-start justify-between">
+              <div className="flex-1">
+                <p className="font-medium">Success</p>
+                <p className="text-sm mt-1">{success}</p>
+              </div>
               <button 
                 onClick={() => setSuccess('')} 
-                className="float-right text-green-500 hover:text-green-700"
+                className="text-green-500 hover:text-green-700 text-lg font-bold"
               >
                 ×
               </button>
             </div>
           )}
+          
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -287,7 +362,7 @@ export default function Dashboard() {
                   Welcome back, {user?.name || 'User'}!
                 </h2>
                 <p className="text-gray-600 mt-1">
-                  Manage your email aliases and stay organized with your communications.
+                  Manage your email aliases and stay organized.
                 </p>
               </div>
               <div className={`px-4 py-2 rounded-full text-sm font-medium ${ 
@@ -299,6 +374,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatsCard 
               title="Total Aliases" 
@@ -324,6 +400,7 @@ export default function Dashboard() {
               actionText="Compose"
             />
           </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ChartCard 
               title="Email Traffic Trends" 
@@ -336,7 +413,9 @@ export default function Dashboard() {
               inboxStats={inboxStats} 
             />
           </div>
+          
           <RecentActivity activities={activities} aliases={aliases} />
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <AssistantChat />
             <AssistantChatPhase2 />
