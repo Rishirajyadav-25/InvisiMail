@@ -39,7 +39,7 @@ export default function SendEmail() {
     if (replyToId) {
       fetchReplyData(replyToId);
     }
-  }, [searchParams]);
+  }, [searchParams,fetchReplyData]);
 
   const fetchUser = async () => {
     try {
