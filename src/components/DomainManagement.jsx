@@ -1,6 +1,3 @@
-// src/components/DomainManagement.jsx
-'use client';
-
 import { useState, useEffect } from 'react';
 import {
   FiPlus,
@@ -11,7 +8,6 @@ import {
   FiRefreshCw,
   FiTrash2,
   FiCopy,
-  FiExternalLink,
   FiInfo
 } from 'react-icons/fi';
 
@@ -34,17 +30,14 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
     }
   }, [user]);
 
-  // Automatically refresh domains every 30 seconds
   useEffect(() => {
     if (user?.plan === 'pro') {
       const interval = setInterval(() => {
         fetchDomains();
-      }, 30000); // 30 seconds
-
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, [user]);
-
 
   const fetchDomains = async () => {
     try {
@@ -80,7 +73,6 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setSuccess(`Domain ${newDomain} added successfully! Please verify ownership.`);
         setNewDomain('');
@@ -108,7 +100,6 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setSuccess(data.message);
         fetchDomains();
@@ -134,7 +125,6 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setSuccess(`Domain ${domainName} deleted successfully`);
         fetchDomains();
@@ -191,6 +181,74 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
     } else {
       return 'bg-red-100 text-red-800';
     }
+  };
+
+  const renderDnsRecords = (domain) => {
+    if (!domain.mailgunDnsRecords) return null;
+
+    const { sending_dns_records = [], receiving_dns_records = [] } = domain.mailgunDnsRecords;
+    const allRecords = [...sending_dns_records, ...receiving_dns_records];
+
+    if (allRecords.length === 0) return null;
+
+    return (
+      <div className="mt-4 space-y-3">
+        <h5 className="text-sm font-medium text-blue-800">Required DNS Records:</h5>
+        {allRecords.map((record, index) => (
+          <div key={index} className="bg-white border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-blue-700 uppercase">{record.record_type}</span>
+              <button
+                onClick={() => copyToClipboard(record.value, `${domain._id}_dns_${index}`)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                {copiedRecord === `${domain._id}_dns_${index}` ?
+                  <FiCheck className="w-4 h-4" /> :
+                  <FiCopy className="w-4 h-4" />
+                }
+              </button>
+            </div>
+            <div className="space-y-1 text-xs">
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-20">Name:</span>
+                <span className="text-gray-900 break-all font-mono">{record.name || '@'}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-20">Value:</span>
+                <span className="text-gray-900 break-all font-mono">{record.value}</span>
+              </div>
+              {record.priority && (
+                <div className="flex">
+                  <span className="font-medium text-gray-600 w-20">Priority:</span>
+                  <span className="text-gray-900 font-mono">{record.priority}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 mt-2">
+                {record.valid === 'valid' || record.valid === true ? (
+                  <>
+                    <FiCheck className="w-4 h-4 text-green-600" />
+                    <span className="text-green-600 font-medium">Configured</span>
+                  </>
+                ) : record.valid === 'unknown' ? (
+                  <>
+                    <FiClock className="w-4 h-4 text-yellow-600" />
+                    <span className="text-yellow-600 font-medium">Pending Verification</span>
+                  </>
+                ) : (
+                  <>
+                    <FiX className="w-4 h-4 text-red-600" />
+                    <span className="text-red-600 font-medium">Not Configured</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+        <p className="text-xs text-blue-600 mt-3">
+          Add these DNS records in your domain provider's dashboard. DNS changes may take 5-60 minutes to propagate.
+        </p>
+      </div>
+    );
   };
 
   if (loading) {
@@ -267,7 +325,6 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
           </div>
         )}
 
-        {/* Add Domain Form */}
         {showAddForm && (
           <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
             <h4 className="text-md font-medium text-gray-900 mb-3">Add New Domain</h4>
@@ -302,7 +359,6 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
           </div>
         )}
 
-        {/* Domains List */}
         {domains.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-4">🌐</div>
@@ -334,7 +390,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                     {!domain.isVerified && (
                       <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-sm">
                         <FiClock className="w-4 h-4" />
-                        Verifying Automatically...
+                        Verifying...
                       </span>
                     )}
                     {domain.isVerified && domain.mailgunStatus !== 'active' && (
@@ -366,7 +422,6 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                   </div>
                 </div>
 
-                {/* DNS Instructions */}
                 {!domain.isVerified && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-3">
                     <h5 className="text-sm font-medium text-yellow-800 mb-2">
@@ -406,70 +461,35 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                       </div>
                     </div>
                     <p className="text-xs text-yellow-600 mt-2">
-                      DNS changes may take up to 24 hours to propagate. We are checking for the record automatically.
+                      DNS changes may take 5-60 minutes to propagate. We're checking automatically every 30 seconds.
                     </p>
+                    {domain.lastVerificationAttempt && (
+                      <p className="text-xs text-yellow-600 mt-1">
+                        Last checked: {new Date(domain.lastVerificationAttempt).toLocaleTimeString()}
+                      </p>
+                    )}
                   </div>
                 )}
 
-                {/* Mailgun DNS Setup Instructions */}
                 {domain.isVerified && domain.mailgunStatus !== 'active' && (
                   <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <h5 className="text-sm font-medium text-blue-800">
                         Complete DNS Setup for Email Delivery
                       </h5>
-                      <a
-                        href={`https://app.mailgun.com/app/domains/${domain.domain}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        <FiExternalLink className="w-4 h-4" />
-                        Mailgun Dashboard
-                      </a>
                     </div>
                     <p className="text-sm text-blue-700 mb-3">
-                      Your domain is verified but requires additional DNS records for email delivery:
+                      Your domain is verified! Now add these DNS records to enable email sending and receiving:
                     </p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        {domain.mxVerified ? (
-                          <FiCheck className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <FiX className="w-4 h-4 text-red-600" />
-                        )}
-                        <span className={domain.mxVerified ? 'text-green-700' : 'text-red-700'}>
-                          MX Records {domain.mxVerified ? 'Configured' : 'Required'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {domain.dkimVerified ? (
-                          <FiCheck className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <FiX className="w-4 h-4 text-red-600" />
-                        )}
-                        <span className={domain.dkimVerified ? 'text-green-700' : 'text-red-700'}>
-                          DKIM Authentication {domain.dkimVerified ? 'Configured' : 'Required'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {domain.spfVerified ? (
-                          <FiCheck className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <FiX className="w-4 h-4 text-red-600" />
-                        )}
-                        <span className={domain.spfVerified ? 'text-green-700' : 'text-red-700'}>
-                          SPF Record {domain.spfVerified ? 'Configured' : 'Required'}
-                        </span>
-                      </div>
+                    {renderDnsRecords(domain)}
+                    <div className="mt-4 pt-3 border-t border-blue-200">
+                      <p className="text-xs text-blue-600">
+                        After adding these records, click "Check Status" button above to verify the configuration.
+                      </p>
                     </div>
-                    <p className="text-xs text-blue-600 mt-2">
-                      Visit the Mailgun dashboard for exact DNS record values and setup instructions.
-                    </p>
                   </div>
                 )}
 
-                {/* Success State */}
                 {domain.isVerified && domain.mailgunStatus === 'active' && (
                   <div className="bg-green-50 border border-green-200 rounded-md p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -478,9 +498,10 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                         Domain Active and Ready
                       </h5>
                     </div>
-                    <p className="text-sm text-green-700">
+                    <p className="text-sm text-green-700 mb-3">
                       Your domain is fully configured and ready for creating email aliases.
                     </p>
+                    {renderDnsRecords(domain)}
                   </div>
                 )}
               </div>

@@ -26,55 +26,58 @@ export default function SignIn() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setMessage('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setMessage('');
+  setLoading(true);
 
-    console.log('Starting sign-in process...');
+  console.log('Starting sign-in process...');
 
-    try {
-      // Add timeout to prevent infinite loading
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+  try {
+    // Add timeout to prevent infinite loading
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        signal: controller.signal,
-        credentials: 'include', // Ensure cookies are included
-      });
+    const response = await fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+      signal: controller.signal,
+      credentials: 'include', // Ensure cookies are included
+    });
 
-      clearTimeout(timeoutId);
+    clearTimeout(timeoutId);
 
-      console.log('Response status:', response.status);
-      console.log('Response OK:', response.ok);
+    console.log('Response status:', response.status);
+    console.log('Response OK:', response.ok);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Sign-in successful:', data);
-        
-        // CRITICAL FIX: Use window.location.href instead of router.push
-        // This forces a full page reload and ensures cookies are properly set
-        window.location.href = '/dashboard';
-      } else {
-        const data = await response.json();
-        console.error('Sign-in failed:', data);
-        setError(data.error || 'Sign in failed. Please check your credentials.');
-      }
-    } catch (err) {
-      console.error('Sign-in error:', err);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Sign-in successful:', data);  // This will log the full response, including user.role
       
-      if (err.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
-      } else {
-        setError('A network error occurred. Please try again later.');
-      }
-    } finally {
-      setLoading(false);
+      // Conditional redirect based on role (defaults to /dashboard if role missing)
+      const redirectPath = data.user?.role === 'admin' ? '/admin' : '/dashboard';
+      console.log('Redirecting to:', redirectPath);  // Add this for debugging
+      
+      // CRITICAL FIX: Use window.location.href for full reload + cookie sync
+      window.location.href = redirectPath;  // <-- CHANGED: Use redirectPath instead of hardcoded '/dashboard'
+    } else {
+      const data = await response.json();
+      console.error('Sign-in failed:', data);
+      setError(data.error || 'Sign in failed. Please check your credentials.');
     }
-  };
+  } catch (err) {
+    console.error('Sign-in error:', err);
+    
+    if (err.name === 'AbortError') {
+      setError('Request timed out. Please try again.');
+    } else {
+      setError('A network error occurred. Please try again later.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="relative w-screen h-screen">

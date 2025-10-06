@@ -29,14 +29,17 @@ export async function POST(request) {
     const hashedPassword = await hashPassword(password);
 
     // Create user
-    const result = await db.collection('users').insertOne({
-      name,
-      email,
-      password: hashedPassword,
-      createdAt: new Date(),
-      plan: 'free',
-      subscriptionId: null
-    });
+// Add isAdmin field when creating user
+const result = await db.collection('users').insertOne({
+  name,
+  email,
+  password: hashedPassword,
+  createdAt: new Date(),
+  plan: 'free',
+  subscriptionId: null,
+  isAdmin: false, // Add this line
+  role: 'user' // Add this line
+});
 
     return NextResponse.json(
       { message: 'User created successfully', userId: result.insertedId },
