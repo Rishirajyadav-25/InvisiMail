@@ -1,6 +1,9 @@
+// lib/screens/auth/login_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
+import '../dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,14 +33,56 @@ class _LoginScreenState extends State<LoginScreen> {
       final result = await api.login(email, password);
       final ok = result['ok'] as bool? ?? false;
       final token = result['token'] as String?;
+      final cookie = result['cookie'] as String?;
 
       if (ok) {
-        if (token != null && token.isNotEmpty) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
+        final prefs = await SharedPreferences.getInstance();
+
+        // *** NEW: Save the authentication cookie ***
+        if (cookie != null && cookie.isNotEmpty) {
+          await prefs.setString('cookie', cookie);
         }
-        if (!mounted) return;
-        Navigator.pushReplacementNamed(context, 'dashboard');
+
+        Future<void> navigateWithData(Map<String, dynamic> data) async {
+          final userName = (data['user']?['name'] ?? data['name'] ?? 'User').toString();
+          await prefs.setString('username', userName);
+
+          if (!mounted) return;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => DashboardScreen(initialData: data)),
+          );
+        }
+
+        if (token != null && token.isNotEmpty) {
+          await prefs.setString('token', token);
+          final body = result['body'] as Map<String, dynamic>?;
+          if (body != null) {
+            await navigateWithData(body);
+          } else {
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(context, 'dashboard');
+          }
+        } else {
+          final body = result['body'] as Map<String, dynamic>?;
+          if (body != null && (body.containsKey('user') || body.containsKey('name'))) {
+            await navigateWithData(body);
+            return;
+          }
+
+          if (cookie != null && cookie.isNotEmpty) {
+            final dashData = await api.fetchDashboardWithCookie(cookie);
+            if (dashData != null) {
+              await navigateWithData(dashData);
+              return;
+            }
+          }
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login succeeded but no token/cookie returned.')),
+          );
+        }
       } else {
         final error = result['error']?.toString() ?? 'Login failed';
         if (!mounted) return;
@@ -60,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),
             TextField(controller: passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),

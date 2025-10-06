@@ -1,3 +1,5 @@
+// lib/screens/auth/signup_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
@@ -31,15 +33,14 @@ class _SignupScreenState extends State<SignupScreen> {
       final api = ApiService();
       final result = await api.register(name, email, password);
       final ok = result['ok'] as bool? ?? false;
-      final token = result['token'] as String?;
 
       if (ok) {
-        if (token != null && token.isNotEmpty) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
-        }
         if (!mounted) return;
-        Navigator.pushReplacementNamed(context, 'dashboard');
+        // After successful registration, navigate to login to sign in
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Signup successful! Please log in.')),
+        );
+        Navigator.pop(context); // Go back to the login screen
       } else {
         final error = result['error']?.toString() ?? 'Signup failed';
         if (!mounted) return;
@@ -63,6 +64,7 @@ class _SignupScreenState extends State<SignupScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Name')),
             TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),

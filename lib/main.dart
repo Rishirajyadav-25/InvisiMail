@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
