@@ -8,46 +8,39 @@ export default function StatsCard({
   title, 
   stat, 
   icon, 
-  theme = 'blue', 
+  theme = 'gold', 
   subtitle = null, 
   actionLink = null, 
   actionText = null 
 }) {
   const themeClasses = {
     blue: {
-      bg: 'bg-blue-50',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      statColor: 'text-blue-600',
-      border: 'border-blue-200'
+      bg: 'bg-blue-500/10',
+      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-400',
+      statColor: 'text-blue-300',
+      border: 'border-blue-500/30'
     },
     green: {
-      bg: 'bg-green-50',
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-600',
-      statColor: 'text-green-600',
-      border: 'border-green-200'
+      bg: 'bg-green-500/10',
+      iconBg: 'bg-green-500/20',
+      iconColor: 'text-green-400',
+      statColor: 'text-green-300',
+      border: 'border-green-500/30'
     },
-    rose: {
-      bg: 'bg-rose-50',
-      iconBg: 'bg-rose-100',
-      iconColor: 'text-rose-600',
-      statColor: 'text-rose-600',
-      border: 'border-rose-200'
-    },
-    yellow: {
-      bg: 'bg-yellow-50',
-      iconBg: 'bg-yellow-100',
-      iconColor: 'text-yellow-600',
-      statColor: 'text-yellow-600',
-      border: 'border-yellow-200'
+    purple: {
+      bg: 'bg-purple-500/10',
+      iconBg: 'bg-purple-500/20',
+      iconColor: 'text-purple-400',
+      statColor: 'text-purple-300',
+      border: 'border-purple-500/30'
     }
   };
 
   const currentTheme = themeClasses[theme] || themeClasses.blue;
 
   return (
-    <div className={`${currentTheme.bg} ${currentTheme.border} border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow`}>
+    <div className={`premium-card ${currentTheme.bg} ${currentTheme.border} border rounded-lg p-6 shadow-sm`}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-3">
@@ -57,12 +50,12 @@ export default function StatsCard({
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">{title}</p>
-              <p className={`text-2xl font-bold ${currentTheme.statColor}`}>
+              <p className="text-sm font-medium text-gray-400 mb-1">{title}</p>
+              <p className={`text-2xl font-bold ${currentTheme.statColor} mb-1`}>
                 {stat}
               </p>
               {subtitle && (
-                <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+                <p className="text-xs text-gray-500">{subtitle}</p>
               )}
             </div>
           </div>

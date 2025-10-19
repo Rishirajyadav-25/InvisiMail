@@ -13,32 +13,32 @@ export default function RecentActivity({ activities, aliases }) {
           text: `Email sent to ${act.data.to}`,
           subject: act.data.subject,
           icon: FiMail,
-          iconColor: 'text-blue-600',
-          bgColor: 'bg-blue-100'
+          iconColor: 'text-blue-400',
+          bgColor: 'bg-blue-500/20'
         };
       case 'added_collaborator':
         return {
           text: `Added ${act.data.addedUserEmail}`,
           subject: `as ${act.data.role}`,
           icon: FiUsers,
-          iconColor: 'text-green-600',
-          bgColor: 'bg-green-100'
+          iconColor: 'text-green-400',
+          bgColor: 'bg-green-500/20'
         };
       case 'removed_collaborator':
         return {
           text: `Removed ${act.data.removedUserEmail}`,
           subject: 'from collaboration',
           icon: FiUsers,
-          iconColor: 'text-red-600',
-          bgColor: 'bg-red-100'
+          iconColor: 'text-red-400',
+          bgColor: 'bg-red-500/20'
         };
       default:
         return {
           text: 'Activity logged',
           subject: '',
           icon: FiEye,
-          iconColor: 'text-gray-600',
-          bgColor: 'bg-gray-100'
+          iconColor: 'text-gray-400',
+          bgColor: 'bg-gray-500/20'
         };
     }
   };
@@ -58,43 +58,43 @@ export default function RecentActivity({ activities, aliases }) {
     : [];
 
   return (
-    <div className="bg-white rounded-xl border shadow-md">
-      <div className="px-5 py-3 border-b">
-        <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
-        <p className="text-sm text-gray-500">Your latest aliases and activities</p>
+    <div className="bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+      <div className="px-5 py-3 border-b border-gray-700">
+        <h3 className="text-lg font-medium text-gray-100">Recent Activity</h3>
+        <p className="text-sm text-gray-400">Your latest aliases and activities</p>
       </div>
       
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-gray-700">
         {/* Recently Created Aliases Section */}
         {recentAliases.length > 0 && (
           <div className="p-5">
             <div className="flex items-center gap-2 mb-3">
-              <FiPlus className="w-4 h-4 text-green-600" />
-              <h4 className="text-sm font-medium text-gray-800">Recently Created Aliases</h4>
+              <FiPlus className="w-4 h-4 text-green-400" />
+              <h4 className="text-sm font-medium text-gray-200">Recently Created Aliases</h4>
             </div>
             <div className="space-y-2">
               {recentAliases.map((alias) => (
-                <div key={alias._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div key={alias._id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
                   <div className="flex items-center space-x-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      alias.isCollaborative ? 'bg-indigo-100' : 'bg-blue-100'
+                      alias.isCollaborative ? 'bg-purple-500/20' : 'bg-blue-500/20'
                     }`}>
                       <span className={`text-sm font-medium ${
-                        alias.isCollaborative ? 'text-indigo-600' : 'text-blue-600'
+                        alias.isCollaborative ? 'text-purple-400' : 'text-blue-400'
                       }`}>
                         {alias.aliasEmail.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-100 truncate">
                         {alias.aliasEmail}
                       </p>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {new Date(alias.createdAt).toLocaleDateString()}
                         </p>
                         {alias.isCollaborative && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300">
                             Team
                           </span>
                         )}
@@ -104,14 +104,14 @@ export default function RecentActivity({ activities, aliases }) {
                   <div className="flex items-center space-x-1">
                     <Link 
                       href={`/dashboard/inbox?alias=${alias.aliasEmail}`}
-                      className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-md transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-gray-200 hover:bg-gray-600 rounded-md transition-colors"
                       title="View Inbox"
                     >
                       <FiMail className="w-4 h-4" />
                     </Link>
                     <Link 
                       href={`/dashboard/send?alias=${alias.aliasEmail}`}
-                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/20 rounded-md transition-colors"
                       title="Send Email"
                     >
                       <FiPlus className="w-4 h-4" />
@@ -125,7 +125,7 @@ export default function RecentActivity({ activities, aliases }) {
 
         {/* Recent Activities Section */}
         <div className="p-5">
-          <h4 className="text-sm font-medium text-gray-800 mb-3">Email Activities</h4>
+          <h4 className="text-sm font-medium text-gray-200 mb-3">Email Activities</h4>
           {recentActivities && recentActivities.length > 0 ? (
             <div className="space-y-3">
               {recentActivities.map((act) => {
@@ -138,15 +138,15 @@ export default function RecentActivity({ activities, aliases }) {
                       <IconComponent className={`w-4 h-4 ${details.iconColor}`} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-900 font-medium truncate">
+                      <p className="text-sm text-gray-100 font-medium truncate">
                         {details.text}
                       </p>
                       {details.subject && (
-                        <p className="text-xs text-gray-600 truncate">
+                        <p className="text-xs text-gray-400 truncate">
                           {details.subject}
                         </p>
                       )}
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-500">
                         {new Date(act.createdAt).toLocaleString()}
                       </p>
                     </div>
@@ -156,24 +156,24 @@ export default function RecentActivity({ activities, aliases }) {
             </div>
           ) : (
             <div className="text-center py-6">
-              <FiEye className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">No recent email activities.</p>
+              <FiEye className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+              <p className="text-sm text-gray-400">No recent email activities.</p>
             </div>
           )}
         </div>
 
         {/* View More Links */}
-        <div className="px-5 py-3 bg-gray-50 rounded-b-xl">
+        <div className="px-5 py-3 bg-gray-700 rounded-b-lg">
           <div className="flex items-center justify-between text-sm">
             <Link 
               href="/dashboard/aliases" 
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
             >
               View all aliases →
             </Link>
             <Link 
               href="/dashboard/inbox" 
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
             >
               Go to inbox →
             </Link>
