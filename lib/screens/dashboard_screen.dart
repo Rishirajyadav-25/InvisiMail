@@ -65,30 +65,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_cookie == null) return;
     // Only set loading if we are showing the email list
     if (_menuItems[_selectedIndex]['type'] != 'aliases') {
-        setState(() { _isLoadingEmails = true; });
+      setState(() { _isLoadingEmails = true; });
     }
 
     final mailType = _menuItems[_selectedIndex]['type']!;
     // Only fetch if it's an email type
     if (mailType == 'received' || mailType == 'sent' || mailType == 'spam') {
-        final fetchedEmails = await _apiService.fetchEmails(cookie: _cookie!, mailType: mailType);
-        if (mounted) {
-            setState(() {
-                _emails = fetchedEmails;
-                _isLoadingEmails = false;
-            });
-        }
+      final fetchedEmails = await _apiService.fetchEmails(cookie: _cookie!, mailType: mailType);
+      if (mounted) {
+        setState(() {
+          _emails = fetchedEmails;
+          _isLoadingEmails = false;
+        });
+      }
     } else {
-         if (mounted) {
-            setState(() { _isLoadingEmails = false; }); // Ensure loading stops for non-email views
-         }
+      if (mounted) {
+        setState(() { _isLoadingEmails = false; }); // Ensure loading stops for non-email views
+      }
     }
   }
 
   // *** NEW FUNCTION to fetch aliases ***
   Future<void> _fetchAliases() async {
     if (_cookie == null) return;
-     if (mounted) { // Check mounted before setState
+    if (mounted) { // Check mounted before setState
       setState(() { _isLoadingAliases = true; });
     }
     final fetchedAliases = await _apiService.fetchAliases(cookie: _cookie!);
@@ -121,8 +121,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (type == 'received' || type == 'sent' || type == 'spam') {
       _fetchEmails();
     } else if (type == 'aliases') {
-       // Aliases are already loaded or being loaded, just ensure email loading stops
-       setState(() { _isLoadingEmails = false; });
+      // Aliases are already loaded or being loaded, just ensure email loading stops
+      setState(() { _isLoadingEmails = false; });
     } else {
       // For unimplemented sections like Settings, show an empty list
       setState(() {
@@ -140,6 +140,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (result == true && mounted) {
       await _fetchAliases();
     }
+  }
+
+  // *** NEW: Function to navigate to Compose screen ***
+  void _navigateToCompose() {
+    Navigator.pushNamed(context, 'compose');
   }
 
   // Build Alias List Widget
@@ -178,32 +183,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Build Email List Widget (similar to before)
   Widget _buildEmailList() {
-     if (_isLoadingEmails) {
+    if (_isLoadingEmails) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_emails.isEmpty) {
       return Center(child: Text('No emails found in ${_menuItems[_selectedIndex]['name']}.'));
     }
     // ... (keep existing ListView.builder for emails)
-     return ListView.builder(
-        itemCount: _emails.length,
-        itemBuilder: (context, index) {
-          final email = _emails[index];
-          // Simple display for now
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-            child: ListTile(
-              leading: Icon(email['isRead'] == false ? Icons.mark_email_unread_outlined : Icons.email_outlined),
-              title: Text(email['subject'] ?? '(No Subject)'),
-              subtitle: Text(
-                  "From: ${email['from'] ?? 'Unknown'} \nTo: ${email['to'] ?? email['aliasEmail'] ?? 'Unknown'}"
-              ),
-              isThreeLine: true,
-              // Add onTap later for email details
+    return ListView.builder(
+      itemCount: _emails.length,
+      itemBuilder: (context, index) {
+        final email = _emails[index];
+        // Simple display for now
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: ListTile(
+            leading: Icon(email['isRead'] == false ? Icons.mark_email_unread_outlined : Icons.email_outlined),
+            title: Text(email['subject'] ?? '(No Subject)'),
+            subtitle: Text(
+                "From: ${email['from'] ?? 'Unknown'} \nTo: ${email['to'] ?? email['aliasEmail'] ?? 'Unknown'}"
             ),
-          );
-        },
-      );
+            isThreeLine: true,
+            // Add onTap later for email details
+          ),
+        );
+      },
+    );
+  }
+
+
+  // *** NEW: Helper to determine which FAB to show ***
+  Widget? _buildFloatingActionButton() {
+    final selectedType = _menuItems[_selectedIndex]['type'];
+
+    switch (selectedType) {
+      case 'aliases':
+      // Show Create Alias FAB
+        return FloatingActionButton.extended(
+          onPressed: _navigateAndRefreshAliases,
+          icon: const Icon(Icons.add),
+          label: const Text('Create Alias'),
+          tooltip: 'Create a new email alias',
+        );
+      case 'received':
+      case 'sent':
+      case 'spam':
+      // Show Compose FAB
+        return FloatingActionButton(
+          onPressed: _navigateToCompose,
+          // *** THIS IS THE FIX: 'icon:' changed to 'child:' ***
+          child: const Icon(Icons.edit),
+          tooltip: 'Compose Email',
+        );
+      case 'settings':
+      default:
+      // Show no FAB
+        return null;
+    }
   }
 
 
@@ -234,7 +270,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               currentAccountPicture: CircleAvatar(
                   backgroundColor: Colors.white,
                   child: Text(_username.isNotEmpty ? _username[0].toUpperCase() : '?',
-                             style: const TextStyle(fontSize: 24.0, color: Colors.blue))),
+                      style: const TextStyle(fontSize: 24.0, color: Colors.blue))),
             ),
             for (int i = 0; i < _menuItems.length; i++)
               ListTile(
@@ -242,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: Text(_menuItems[i]['name']!),
                 selected: _selectedIndex == i,
                 onTap: () => _onMenuItemTapped(i),
-                 selectedTileColor: Colors.blue.withOpacity(0.1),
+                selectedTileColor: Colors.blue.withOpacity(0.1),
               ),
           ],
         ),
@@ -250,15 +286,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Show either email list or alias list
       body: showAliases ? _buildAliasList() : _buildEmailList(),
 
-       // Add FloatingActionButton only when showing Aliases
-      floatingActionButton: showAliases
-          ? FloatingActionButton.extended(
-              onPressed: _navigateAndRefreshAliases,
-              icon: const Icon(Icons.add),
-              label: const Text('Create Alias'),
-              tooltip: 'Create a new email alias',
-            )
-          : null, // No FAB for email views
+      // *** MODIFIED: Use the helper function for the FAB ***
+      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 }

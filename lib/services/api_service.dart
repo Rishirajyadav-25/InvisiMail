@@ -226,6 +226,70 @@ class ApiService {
     }
   }
 
+  // *** Send Email ---
+  Future<Map<String, dynamic>> sendEmail({
+    required String cookie,
+    required String fromAlias,
+    required String to,
+    required String subject,
+    required String body,
+  }) async {
+    try {
+      // *** MODIFIED: Changed endpoint from /send to /send-email ***
+      final uri = Uri.parse('$baseUrl/send-email');
+      print('--- [API] Sending email from: $fromAlias to: $to via $uri'); // Updated log
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': cookie,
+        },
+        body: jsonEncode({
+          'from': fromAlias, // Check if backend expects 'from' or 'fromAlias'
+          'to': to,
+          'subject': subject,
+          'text': body, // Backend code uses 'text', ensure this matches
+        }),
+      );
+
+      final status = response.statusCode;
+      Map<String, dynamic>? decoded;
+      try {
+        decoded = jsonDecode(response.body) as Map<String, dynamic>?;
+      } catch (_) {
+        decoded = null;
+      }
+
+      print('--- [API] Send email response status: $status');
+      print('--- [API] Send email response body: ${response.body}');
+
+      String? message;
+      if (status < 200 || status >= 300) {
+        if (decoded != null) {
+          message = decoded['error']?.toString() ?? decoded['message']?.toString() ?? decoded.toString();
+        } else {
+          message = response.body.isNotEmpty ? response.body : 'Request failed with status $status';
+        }
+        print('--- [API] Send email error: $message');
+      }
+
+      return {
+        'status': status,
+        'ok': status >= 200 && status < 300,
+        'body': decoded ?? {'raw': response.body},
+        'error': message,
+      };
+    } catch (e) {
+      print('--- [API] Error sending email: $e');
+      return {
+        'status': 500,
+        'ok': false,
+        'error': 'Network error: $e',
+      };
+    }
+  }
+
   // --- Register ---
   Future<Map<String, dynamic>> register(String name, String email, String password) async {
     final response = await http.post(

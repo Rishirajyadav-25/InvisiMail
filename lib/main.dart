@@ -5,6 +5,7 @@ import 'screens/auth/signup_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/create_alias_screen.dart'; // <-- Import the new screen
+import 'screens/compose_screen.dart'; // <-- *** IMPORT COMPOSE SCREEN ***
 
 void main() => runApp(const InvisiMailApp());
 
@@ -27,6 +28,7 @@ class InvisiMailApp extends StatelessWidget {
         'signup': (context) => const SignupScreen(),
         'dashboard': (context) => const DashboardScreen(),
         'create_alias': (context) => const CreateAliasScreen(), // <-- Add the route
+        'compose': (context) => const ComposeScreen(), // <-- *** ADD COMPOSE ROUTE ***
       },
     );
   }
