@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+// Remove import 'package:invisimail_app/screens/create_alias_screen.dart'; // No longer needed here if navigating by name
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -20,14 +21,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _username = "User";
   int _selectedIndex = 0;
   bool _isLoadingEmails = true;
+  bool _isLoadingAliases = true; // <-- New loading state for aliases
   List<dynamic> _emails = [];
+  List<dynamic> _aliases = []; // <-- New state for aliases
 
-  final List<Map<String, String>> _menuItems = [
-    {"name": "Inbox", "type": "received"},
-    {"name": "Sent", "type": "sent"},
-    {"name": "Spam", "type": "spam"},
-    {"name": "Trash", "type": "trash"}, // Note: 'trash' type might not exist on backend yet
-    {"name": "Settings", "type": "settings"},
+  // Define menu items - let's add an 'Aliases' item
+  final List<Map<String, dynamic>> _menuItems = [
+    {"name": "Inbox", "type": "received", "icon": Icons.inbox},
+    {"name": "Sent", "type": "sent", "icon": Icons.send},
+    {"name": "Spam", "type": "spam", "icon": Icons.block},
+    {"name": "Aliases", "type": "aliases", "icon": Icons.alternate_email}, // <-- New menu item
+    {"name": "Settings", "type": "settings", "icon": Icons.settings},
   ];
 
   @override
@@ -47,34 +51,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     if (_cookie != null) {
-      _fetchEmails();
+      // Fetch both emails and aliases initially
+      await Future.wait([_fetchEmails(), _fetchAliases()]); // Fetch in parallel
     } else {
-      // If there's no cookie, we can't fetch data. Something went wrong.
       setState(() {
         _isLoadingEmails = false;
+        _isLoadingAliases = false;
       });
     }
   }
 
   Future<void> _fetchEmails() async {
     if (_cookie == null) return;
-    setState(() {
-      _isLoadingEmails = true;
-      _emails = []; // Clear old emails
-    });
+    // Only set loading if we are showing the email list
+    if (_menuItems[_selectedIndex]['type'] != 'aliases') {
+        setState(() { _isLoadingEmails = true; });
+    }
 
     final mailType = _menuItems[_selectedIndex]['type']!;
-    final fetchedEmails = await _apiService.fetchEmails(cookie: _cookie!, mailType: mailType);
+    // Only fetch if it's an email type
+    if (mailType == 'received' || mailType == 'sent' || mailType == 'spam') {
+        final fetchedEmails = await _apiService.fetchEmails(cookie: _cookie!, mailType: mailType);
+        if (mounted) {
+            setState(() {
+                _emails = fetchedEmails;
+                _isLoadingEmails = false;
+            });
+        }
+    } else {
+         if (mounted) {
+            setState(() { _isLoadingEmails = false; }); // Ensure loading stops for non-email views
+         }
+    }
+  }
 
-    if (mounted) {
+  // *** NEW FUNCTION to fetch aliases ***
+  Future<void> _fetchAliases() async {
+    if (_cookie == null) return;
+     if (mounted) { // Check mounted before setState
+      setState(() { _isLoadingAliases = true; });
+    }
+    final fetchedAliases = await _apiService.fetchAliases(cookie: _cookie!);
+    if (mounted) { // Check mounted again before final setState
       setState(() {
-        _emails = fetchedEmails;
-        _isLoadingEmails = false;
+        _aliases = fetchedAliases;
+        _isLoadingAliases = false;
       });
     }
   }
 
+
   Future<void> _logout() async {
+    // ... (keep existing logout code)
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cookie');
     await prefs.remove('username');
@@ -85,27 +113,113 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _onMenuItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _isLoadingEmails = true; // Assume loading until fetch completes or is skipped
     });
-    // For now, only fetch emails for Inbox, Sent, and Spam
-    if (index <= 2) {
+
+    final type = _menuItems[index]['type'];
+
+    if (type == 'received' || type == 'sent' || type == 'spam') {
       _fetchEmails();
+    } else if (type == 'aliases') {
+       // Aliases are already loaded or being loaded, just ensure email loading stops
+       setState(() { _isLoadingEmails = false; });
     } else {
-      // For unimplemented sections like Trash/Settings, show an empty list
+      // For unimplemented sections like Settings, show an empty list
       setState(() {
         _emails = [];
+        _isLoadingEmails = false;
       });
     }
-    Navigator.pop(context);
+    Navigator.pop(context); // Close drawer
   }
+
+  // Function to navigate and potentially refresh aliases
+  Future<void> _navigateAndRefreshAliases() async {
+    final result = await Navigator.pushNamed(context, 'create_alias');
+    // If the create alias screen returned true (success), refresh the alias list
+    if (result == true && mounted) {
+      await _fetchAliases();
+    }
+  }
+
+  // Build Alias List Widget
+  Widget _buildAliasList() {
+    if (_isLoadingAliases) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_aliases.isEmpty) {
+      return const Center(child: Text('No aliases found. Create one!'));
+    }
+    return ListView.builder(
+      itemCount: _aliases.length,
+      itemBuilder: (context, index) {
+        final alias = _aliases[index];
+        final isActive = alias['isActive'] ?? true; // Default to true if missing
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: ListTile(
+            leading: Icon(
+              Icons.alternate_email,
+              color: isActive ? Colors.green : Colors.grey,
+            ),
+            title: Text(alias['aliasEmail'] ?? 'Unknown Alias'),
+            subtitle: Text(isActive ? 'Active' : 'Inactive'),
+            trailing: Icon(
+              Icons.circle,
+              size: 12,
+              color: isActive ? Colors.green : Colors.red,
+            ),
+            // Add onTap later for alias details/edit
+          ),
+        );
+      },
+    );
+  }
+
+  // Build Email List Widget (similar to before)
+  Widget _buildEmailList() {
+     if (_isLoadingEmails) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_emails.isEmpty) {
+      return Center(child: Text('No emails found in ${_menuItems[_selectedIndex]['name']}.'));
+    }
+    // ... (keep existing ListView.builder for emails)
+     return ListView.builder(
+        itemCount: _emails.length,
+        itemBuilder: (context, index) {
+          final email = _emails[index];
+          // Simple display for now
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: ListTile(
+              leading: Icon(email['isRead'] == false ? Icons.mark_email_unread_outlined : Icons.email_outlined),
+              title: Text(email['subject'] ?? '(No Subject)'),
+              subtitle: Text(
+                  "From: ${email['from'] ?? 'Unknown'} \nTo: ${email['to'] ?? email['aliasEmail'] ?? 'Unknown'}"
+              ),
+              isThreeLine: true,
+              // Add onTap later for email details
+            ),
+          );
+        },
+      );
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    // Determine which view to show based on selected index
+    final selectedType = _menuItems[_selectedIndex]['type'];
+    final bool showAliases = selectedType == 'aliases';
+
     return Scaffold(
       appBar: AppBar(
         title: Text("InvisiMail: ${_menuItems[_selectedIndex]['name']!}"),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
             onPressed: _logout,
           ),
         ],
@@ -116,42 +230,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             UserAccountsDrawerHeader(
               accountName: Text(_username),
-              accountEmail: const Text("Logged In"),
-              currentAccountPicture: const CircleAvatar(child: Icon(Icons.person)),
+              accountEmail: const Text(""), // Email not directly available, keep empty or fetch if needed
+              currentAccountPicture: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text(_username.isNotEmpty ? _username[0].toUpperCase() : '?',
+                             style: const TextStyle(fontSize: 24.0, color: Colors.blue))),
             ),
             for (int i = 0; i < _menuItems.length; i++)
               ListTile(
-                leading: Icon( i == 0 ? Icons.inbox : i == 1 ? Icons.send : i == 2 ? Icons.block : i == 3 ? Icons.delete : Icons.settings ),
+                leading: Icon(_menuItems[i]['icon'] as IconData?), // Use defined icon
                 title: Text(_menuItems[i]['name']!),
                 selected: _selectedIndex == i,
                 onTap: () => _onMenuItemTapped(i),
+                 selectedTileColor: Colors.blue.withOpacity(0.1),
               ),
           ],
         ),
       ),
-      body: _isLoadingEmails
-          ? const Center(child: CircularProgressIndicator())
-          : _emails.isEmpty
-          ? const Center(child: Text('No emails found.'))
-          : ListView.builder(
-        itemCount: _emails.length,
-        itemBuilder: (context, index) {
-          final email = _emails[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-            child: ListTile(
-              title: Text(email['subject'] ?? '(No Subject)'),
-              subtitle: Text(
-                  "${email['from'] ?? 'Unknown Sender'} • ${email['bodyPlain']?.substring(0, (email['bodyPlain']?.length ?? 0) > 50 ? 50 : email['bodyPlain']?.length ?? 0).replaceAll('\n', ' ')}..."
-              ),
-              leading: const Icon(Icons.email_outlined),
-              onTap: () {
-                // You can add navigation to a detailed email view here
-              },
-            ),
-          );
-        },
-      ),
+      // Show either email list or alias list
+      body: showAliases ? _buildAliasList() : _buildEmailList(),
+
+       // Add FloatingActionButton only when showing Aliases
+      floatingActionButton: showAliases
+          ? FloatingActionButton.extended(
+              onPressed: _navigateAndRefreshAliases,
+              icon: const Icon(Icons.add),
+              label: const Text('Create Alias'),
+              tooltip: 'Create a new email alias',
+            )
+          : null, // No FAB for email views
     );
   }
 }

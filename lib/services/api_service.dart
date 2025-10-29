@@ -4,16 +4,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = 'https://www.codetodo.me/api';
+  final String baseUrl = 'https://www.codetodo.me/api'; // Make sure this is your correct backend URL
 
-  // --- No changes to login() or register() ---
+  // --- Login ---
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/signin'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
-    // ... same login code as before
     final status = response.statusCode;
     Map<String, dynamic>? decoded;
     try {
@@ -54,7 +53,12 @@ class ApiService {
     };
   }
 
+  // --- Fetch Dashboard with Cookie ---
   Future<Map<String, dynamic>?> fetchDashboardWithCookie(String cookieHeader) async {
+    // --- START: Added for debugging ---
+    print('--- [API] Validating cookie: $cookieHeader');
+    // --- END: Added for debugging ---
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/user'),
@@ -63,24 +67,46 @@ class ApiService {
           'Cookie': cookieHeader,
         },
       );
+
+      // --- START: Added for debugging ---
+      print('--- [API] Validation response status: ${response.statusCode}');
+      // --- END: Added for debugging ---
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
+
+        // --- START: Added for debugging ---
+        print('--- [API] Validation success, data: $decoded');
+        // --- END: Added for debugging ---
+
         if (decoded is Map<String, dynamic>) return {'user': decoded};
         return null;
+      } else {
+        // --- START: Added for debugging ---
+        print('--- [API] Validation failed, body: ${response.body}');
+        // --- END: Added for debugging ---
+        return null;
       }
-    } catch (_) {}
-    return null;
+    } catch (e) {
+      // --- START: Added for debugging ---
+      print('--- [API] Validation error: $e');
+      // --- END: Added for debugging ---
+      return null;
+    }
   }
 
-  // *** NEW FUNCTION to fetch emails from your backend ***
+  // --- Fetch Emails ---
   Future<List<dynamic>> fetchEmails({
     required String cookie,
-    String mailType = 'all',
+    String mailType = 'all', // Ensure this matches backend expectation (received, sent, spam, all)
     int page = 1,
     int limit = 20,
   }) async {
     try {
+      // Using /inbox endpoint based on backend code
       final uri = Uri.parse('$baseUrl/inbox?type=$mailType&page=$page&limit=$limit');
+      print('--- [API] Fetching emails from: $uri'); // Debugging URI
+
       final response = await http.get(
         uri,
         headers: {
@@ -91,19 +117,117 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['emails'] as List<dynamic>;
+        // Ensure the response has the 'emails' key as expected
+        if (data is Map<String, dynamic> && data.containsKey('emails') && data['emails'] is List) {
+          return data['emails'] as List<dynamic>;
+        } else {
+          print('--- [API] Unexpected email data format: $data');
+          return [];
+        }
       } else {
-        print('Failed to load emails: ${response.statusCode}');
+        print('--- [API] Failed to load emails: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
-      print('Error fetching emails: $e');
+      print('--- [API] Error fetching emails: $e');
       return [];
     }
   }
 
+  // --- Fetch Aliases ---
+  Future<List<dynamic>> fetchAliases({required String cookie}) async {
+    try {
+      final uri = Uri.parse('$baseUrl/aliases');
+      print('--- [API] Fetching aliases from: $uri'); // Debug URI
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': cookie,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return data;
+        } else {
+          print('--- [API] Unexpected alias data format: $data');
+          return [];
+        }
+      } else {
+        print('--- [API] Failed to load aliases: ${response.statusCode} - ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('--- [API] Error fetching aliases: $e');
+      return [];
+    }
+  }
+
+  // --- Create Alias ---
+  Future<Map<String, dynamic>> createAlias({
+    required String aliasName,
+    required String cookie,
+    bool isCollaborative = false,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/aliases');
+      print('--- [API] Creating alias at: $uri with name: $aliasName'); // Debug URI and Data
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': cookie,
+        },
+        body: jsonEncode({
+          'alias': aliasName, // Match backend API expectation
+          'isCollaborative': isCollaborative,
+        }),
+      );
+
+      final status = response.statusCode;
+      Map<String, dynamic>? decoded;
+      try {
+        decoded = jsonDecode(response.body) as Map<String, dynamic>?;
+      } catch (_) {
+        decoded = null;
+      }
+
+      print('--- [API] Create alias response status: $status'); // Debug Status
+      print('--- [API] Create alias response body: ${response.body}'); // Debug Body
+
+
+      String? message;
+      if (status < 200 || status >= 300) {
+        if (decoded != null) {
+          message = decoded['error']?.toString() ?? decoded['message']?.toString() ?? decoded.toString();
+        } else {
+          message = response.body.isNotEmpty ? response.body : 'Request failed with status $status';
+        }
+        print('--- [API] Create alias error message: $message'); // Debug error message
+      }
+
+      return {
+        'status': status,
+        'ok': status >= 200 && status < 300,
+        'body': decoded ?? {'raw': response.body},
+        'error': message,
+      };
+    } catch (e) {
+      print('--- [API] Error creating alias: $e');
+      return {
+        'status': 500,
+        'ok': false,
+        'error': 'Network error: $e',
+      };
+    }
+  }
+
+  // --- Register ---
   Future<Map<String, dynamic>> register(String name, String email, String password) async {
-    // ... same register code as before
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: {'Content-Type': 'application/json'},
@@ -116,10 +240,19 @@ class ApiService {
     } catch (_) {
       decoded = null;
     }
+    String? message; // Add error message handling similar to login/createAlias
+    if (status < 200 || status >= 300) {
+      if (decoded != null) {
+        message = decoded['error']?.toString() ?? decoded['message']?.toString() ?? decoded.toString();
+      } else {
+        message = response.body.isNotEmpty ? response.body : 'Request failed with status $status';
+      }
+    }
     return {
       'status': status,
       'ok': status >= 200 && status < 300,
       'body': decoded ?? {'raw': response.body},
+      'error': message, // Include error message in response
     };
   }
 }
