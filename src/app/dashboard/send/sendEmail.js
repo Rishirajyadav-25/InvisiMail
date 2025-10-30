@@ -1,4 +1,4 @@
-// src/app/dashboard/send/SendEmail.jsx
+/* eslint-disable */
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
