@@ -1,4 +1,4 @@
-// src/app/dashboard/page.jsx - ENHANCED WITH THEME TOGGLE AND FOOTER
+// src/app/dashboard/page.jsx - WITH ASSISTANT CHAT
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,9 @@ import {
   FiMoon
 } from 'react-icons/fi';
 import Sidebar from '@/components/Sidebar';
+import AssistantChat from '@/components/AssistantChatPhase2';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -394,7 +396,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-[#0F172A] text-gray-800 dark:text-gray-300">
+    <div className="flex h-full bg-gray-100 dark:bg-[#0F172A] text-gray-800 dark:text-gray-300">
       <Sidebar user={user} onUpgrade={handleUpgrade} theme={theme} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -708,7 +710,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* --- NEW: Footer --- */}
+          {/* Footer */}
           <footer 
             className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 animate-fade-in-up" 
             style={{animationDelay: '0.7s'}}
@@ -721,25 +723,30 @@ export default function Dashboard() {
               </div>
             </div>
           </footer>
-          {/* --- End of Footer --- */}
 
         </main>
       </div>
 
-      {/* --- GLOBAL STYLES --- */}
+      {/* Assistant Chat Component */}
+      <AssistantChatPhase2 />
+
       <style jsx global>{`
-        /* --- Default Light Theme --- */
+        /* Default Light Theme */
+        html {
+          height: 100%;
+        }
         body {
-          background-color: #F3F4F6; /* bg-gray-100 */
-          color: #1F2937; /* text-gray-800 */
+          height: 100%;
+          background-color: #F3F4F6;
+          color: #1F2937;
           overscroll-behavior: none;
           transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* --- Dark Theme Overrides --- */
+        /* Dark Theme Overrides */
         .dark body {
           background-color: #0F172A;
-          color: #d1d5db; /* text-gray-300 */
+          color: #d1d5db;
         }
 
         /* Animated Gradient Background (Dark Mode Only) */
@@ -755,16 +762,15 @@ export default function Dashboard() {
             -45deg,
             #0f172a,
             #0f172a,
-            #132447, /* Dark blue */
-            #1e1b4b  /* Dark violet */
+            #132447,
+            #1e1b4b
           );
           background-size: 400% 400%;
           animation: gradient-pan 20s ease infinite;
           opacity: 0.8;
         }
 
-        /* --- KEYFRAME ANIMATIONS (Unchanged) --- */
-        
+        /* Keyframe Animations */
         @keyframes gradient-pan {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
@@ -812,12 +818,8 @@ export default function Dashboard() {
           animation: spin-glow 1.5s linear infinite;
         }
 
-
-        /* --- CUSTOM COMPONENT CLASSES (Now Theme-Aware) --- */
-
-        /* The core glassmorphism panel style */
+        /* Custom Component Classes */
         .glass-panel {
-          /* Light Mode */
           background-color: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(24px);
           -webkit-backdrop-filter: blur(24px);
@@ -829,58 +831,53 @@ export default function Dashboard() {
           transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .dark .glass-panel {
-          /* Dark Mode */
-          background-color: rgba(28, 37, 58, 0.6); /* bg-glass-bg */
-          border: 1px solid rgba(255, 255, 255, 0.1); /* border-glass-stroke */
+          background-color: rgba(28, 37, 58, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           box-shadow: 
-            0 8px 32px 0 rgba(0, 0, 0, 0.37), /* shadow-lg */
-            inset 0 1px 1px 0 rgba(255, 255, 255, 0.05); /* shadow-inner-light */
+            0 8px 32px 0 rgba(0, 0, 0, 0.37),
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.05);
         }
 
-        /* Animated gradient text (Unchanged, gradient looks good on light/dark) */
         .animated-gradient-text {
           background-clip: text;
           -webkit-background-clip: text;
           color: transparent;
           background-image: linear-gradient(
             90deg,
-            #a5b4fc, /* Indigo-200 */
-            #3b82f6, /* Blue-500 */
-            #06b6d4, /* Cyan-500 */
+            #a5b4fc,
+            #3b82f6,
+            #06b6d4,
             #a5b4fc
           );
           background-size: 200% auto;
           animation: gradient-text 4s linear infinite;
         }
         
-        /* Custom styled scrollbar */
         .main-content-scroll::-webkit-scrollbar {
-          width: 0.5rem; /* w-2 */
+          width: 0.5rem;
         }
         .main-content-scroll::-webkit-scrollbar-track {
-          background-color: rgba(15, 23, 42, 0.0); /* transparent dark */
+          background-color: rgba(15, 23, 42, 0.0);
         }
         .dark .main-content-scroll::-webkit-scrollbar-track {
-          background-color: rgba(15, 23, 42, 0.5); /* bg-base-dark/50 */
+          background-color: rgba(15, 23, 42, 0.5);
         }
         .main-content-scroll::-webkit-scrollbar-thumb {
-          background-color: rgba(59, 130, 246, 0.5); /* bg-electric-blue/50 */
-          border-radius: 9999px; /* rounded-full */
+          background-color: rgba(59, 130, 246, 0.5);
+          border-radius: 9999px;
           border: 2px solid transparent;
           background-clip: content-box;
         }
         .main-content-scroll::-webkit-scrollbar-thumb:hover {
-          background-color: rgba(59, 130, 246, 0.8); /* bg-electric-blue/80 */
+          background-color: rgba(59, 130, 246, 0.8);
         }
 
-        /* Glass button style */
         .btn-glass {
-          /* Light Mode */
           padding: 0.5rem 1.25rem;
           border-radius: 0.5rem;
           font-size: 0.875rem;
           font-weight: 500;
-          color: #1F2937; /* text-gray-800 */
+          color: #1F2937;
           background-color: rgba(255, 255, 255, 0.5);
           border: 1px solid rgba(0, 0, 0, 0.1);
           backdrop-filter: blur(16px);
@@ -889,7 +886,6 @@ export default function Dashboard() {
           transition: all 0.3s;
         }
         .dark .btn-glass {
-          /* Dark Mode */
           color: white;
           background-color: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.1);
@@ -907,16 +903,14 @@ export default function Dashboard() {
         }
         
         .btn-glass.primary {
-           /* Light Mode Primary */
            background-color: rgba(59, 130, 246, 0.2);
            border-color: rgba(59, 130, 246, 0.4);
-           color: #1e40af; /* text-blue-800 */
+           color: #1e40af;
         }
         .dark .btn-glass.primary {
-           /* Dark Mode Primary */
-           background-color: rgba(59, 130, 246, 0.3); /* bg-blue-500/30 */
-           border-color: rgba(59, 130, 246, 0.5); /* border-blue-500/50 */
-           color: #bfdbfe; /* text-blue-200 */
+           background-color: rgba(59, 130, 246, 0.3);
+           border-color: rgba(59, 130, 246, 0.5);
+           color: #bfdbfe;
         }
         
         .btn-glass.primary:hover {
@@ -929,7 +923,6 @@ export default function Dashboard() {
            box-shadow: 0 0 20px 0 rgba(59, 130, 246, 0.4);
         }
 
-        /* Custom glow shadows (Dark Mode Only) */
         .dark .shadow-electric-glow {
           box-shadow: 0 0 20px 0 rgba(59, 130, 246, 0.4);
         }
@@ -937,7 +930,6 @@ export default function Dashboard() {
           box-shadow: 0 0 20px 0 rgba(59, 130, 246, 0.4);
         }
 
-        /* Ensure recharts tooltips are styled */
         .recharts-tooltip-wrapper {
           z-index: 50 !important;
         }

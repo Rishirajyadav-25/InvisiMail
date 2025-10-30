@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import AliasesOverview from '@/components/AliasesOverview';
+import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
 
 export default function AllAliasesPage() {
   const [user, setUser] = useState(null);
@@ -273,6 +274,8 @@ export default function AllAliasesPage() {
             </div>
           )}
 
+          
+
           <AliasesOverview
             user={user}
             aliases={aliases}
@@ -289,7 +292,10 @@ export default function AllAliasesPage() {
             setManagingAliasId={setManagingAliasId}
             setAddEmail={setAddEmail}
             setAddRole={setAddRole}
+
+            
           />
+          <AssistantChatPhase2 />
         </main>
       </div>
     </div>

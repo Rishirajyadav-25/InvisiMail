@@ -200,7 +200,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
               <span className="text-xs font-semibold text-blue-700 uppercase">{record.record_type}</span>
               <button
                 onClick={() => copyToClipboard(record.value, `${domain._id}_dns_${index}`)}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 hover:text-blue-800 transition-colors"
               >
                 {copiedRecord === `${domain._id}_dns_${index}` ?
                   <FiCheck className="w-4 h-4" /> :
@@ -253,7 +253,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-md border p-6">
+      <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="space-y-3">
@@ -267,7 +267,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
 
   if (user?.plan !== 'pro') {
     return (
-      <div className="bg-white rounded-xl shadow-md border">
+      <div className="bg-white rounded-xl shadow-md border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">Custom Domains</h3>
           <p className="mt-1 text-sm text-gray-600">
@@ -281,7 +281,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
             <p className="text-gray-600 mb-4">
               Custom domains are available for Pro users. Upgrade to use your own domain for email aliases.
             </p>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               Upgrade to Pro
             </button>
           </div>
@@ -291,7 +291,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md border">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
@@ -303,7 +303,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
           {!showAddForm && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
             >
               <FiPlus className="w-4 h-4" />
               Add Domain
@@ -314,14 +314,16 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
 
       <div className="p-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
-            {error}
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-start gap-2">
+            <FiAlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-4">
-            {success}
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-start gap-2">
+            <FiCheck className="w-5 h-5 mt-0.5 flex-shrink-0" />
+            <span>{success}</span>
           </div>
         )}
 
@@ -334,14 +336,14 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                 value={newDomain}
                 onChange={(e) => setNewDomain(e.target.value)}
                 placeholder="example.com"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder:text-gray-400 transition-colors"
                 required
                 disabled={submitting}
               />
               <button
                 type="submit"
                 disabled={submitting || !newDomain.trim()}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm shadow-sm"
               >
                 {submitting ? 'Adding...' : 'Add'}
               </button>
@@ -351,7 +353,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                   setShowAddForm(false);
                   setNewDomain('');
                 }}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                className="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
@@ -368,7 +370,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
         ) : (
           <div className="space-y-4">
             {domains.map((domain) => (
-              <div key={domain._id} className="border border-gray-200 rounded-lg p-4">
+              <div key={domain._id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     {getStatusIcon(domain)}
@@ -388,7 +390,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                   </div>
                   <div className="flex items-center gap-2">
                     {!domain.isVerified && (
-                      <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-sm">
+                      <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg text-sm">
                         <FiClock className="w-4 h-4" />
                         Verifying...
                       </span>
@@ -397,7 +399,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                       <button
                         onClick={() => handleCheckMailgunStatus(domain._id)}
                         disabled={verifying[`${domain._id}_mailgun`]}
-                        className="inline-flex items-center gap-2 bg-orange-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center gap-2 bg-orange-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
                       >
                         {verifying[`${domain._id}_mailgun`] ? (
                           <>
@@ -414,7 +416,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                     )}
                     <button
                       onClick={() => handleDeleteDomain(domain._id, domain.domain)}
-                      className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-700 transition-colors"
+                      className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-red-700 transition-colors shadow-sm"
                     >
                       <FiTrash2 className="w-4 h-4" />
                       Delete
@@ -423,37 +425,37 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                 </div>
 
                 {!domain.isVerified && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-3">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-3">
                     <h5 className="text-sm font-medium text-yellow-800 mb-2">
                       Domain Verification Required
                     </h5>
                     <p className="text-sm text-yellow-700 mb-3">
                       Please add the following TXT record to your DNS settings to verify ownership:
                     </p>
-                    <div className="bg-white border border-yellow-300 rounded p-3 font-mono text-sm">
+                    <div className="bg-white border border-yellow-300 rounded-lg p-3 font-mono text-sm">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">Type:</span>
-                        <span>TXT</span>
+                        <span className="font-medium text-gray-700">Type:</span>
+                        <span className="text-gray-900">TXT</span>
                       </div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">Name:</span>
+                        <span className="font-medium text-gray-700">Name:</span>
                         <div className="flex items-center gap-2">
-                          <span className="break-all">_mailalias-verification.{domain.domain}</span>
+                          <span className="break-all text-gray-900">_mailalias-verification.{domain.domain}</span>
                           <button
                             onClick={() => copyToClipboard(`_mailalias-verification.${domain.domain}`, `${domain._id}_name`)}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
                           >
                             {copiedRecord === `${domain._id}_name` ? <FiCheck className="w-4 h-4" /> : <FiCopy className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Value:</span>
+                        <span className="font-medium text-gray-700">Value:</span>
                         <div className="flex items-center gap-2">
-                          <span className="break-all">{domain.verificationToken}</span>
+                          <span className="break-all text-gray-900">{domain.verificationToken}</span>
                           <button
                             onClick={() => copyToClipboard(domain.verificationToken, `${domain._id}_value`)}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
                           >
                             {copiedRecord === `${domain._id}_value` ? <FiCheck className="w-4 h-4" /> : <FiCopy className="w-4 h-4" />}
                           </button>
@@ -472,7 +474,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                 )}
 
                 {domain.isVerified && domain.mailgunStatus !== 'active' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h5 className="text-sm font-medium text-blue-800">
                         Complete DNS Setup for Email Delivery
@@ -491,7 +493,7 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
                 )}
 
                 {domain.isVerified && domain.mailgunStatus === 'active' && (
-                  <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <FiCheck className="w-5 h-5 text-green-600" />
                       <h5 className="text-sm font-medium text-green-800">
@@ -511,4 +513,4 @@ export default function DomainManagement({ user, onDomainsUpdate }) {
       </div>
     </div>
   );
-}
+}   
