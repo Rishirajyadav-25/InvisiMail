@@ -4,6 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Inbox, Send, AlertOctagon, Trash2, Reply, MoreVertical, RefreshCw, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
 
+import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
+
+
 // Enhanced Sidebar with hover expand/collapse
 function EnhancedSidebar({ user, counts, mailType, setMailType, onLogout, isExpanded, setIsExpanded }) {
     return (
@@ -381,11 +384,14 @@ function EmailListItem({ email, isSelected, onClick, formatDate }) {
                             </span>
                         )}
                     </div>
+
                 </div>
             </div>
         </button>
     );
 }
+
+
 
 // Enhanced Email List Pane with real API integration
 function EnhancedEmailList({ emails, loading, selectedEmailId, onSelectEmail, mailType, aliases, selectedAlias, setSelectedAlias, unreadOnly, setUnreadOnly, onRefresh, formatDate }) {
@@ -436,6 +442,9 @@ function EnhancedEmailList({ emails, loading, selectedEmailId, onSelectEmail, ma
                         <span className="text-sm font-medium text-slate-700">Unread only</span>
                     </label>
                 </div>
+                <div className="mt-3">
+  <AssistantChatPhase2 />
+</div>
             </header>
 
             {/* Email List */}

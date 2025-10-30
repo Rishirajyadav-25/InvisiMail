@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import CreateAliasForm from '@/components/CreateAliasForm';
+import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
 
 export default function CreateAliasPage() {
   const [user, setUser] = useState(null);
@@ -58,7 +59,7 @@ export default function CreateAliasPage() {
 
   const pollUserStatus = async () => {
     const maxAttempts = 10;
-    const interval = 2000; // 2 seconds
+    const interval = 2000;
     let attempt = 0;
 
     while (attempt < maxAttempts) {
@@ -255,6 +256,9 @@ export default function CreateAliasPage() {
               {success}
             </div>
           )}
+
+          {/* ADD ASSISTANT CHAT HERE */}
+          <AssistantChatPhase2 />
 
           <div className="max-w-2xl">
             <CreateAliasForm

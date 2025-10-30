@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import DomainManagement from '@/components/DomainManagement';
+import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
 
 export default function DomainsPage() {
   const [user, setUser] = useState(null);
@@ -26,9 +27,9 @@ export default function DomainsPage() {
         setUser(userData);
         if (userData.plan !== 'pro') {
           setError('Custom domains are a Pro feature. Please upgrade to access.');
-          setTimeout(() => router.push('/dashboard'), 3000); // Redirect after showing message
+          setTimeout(() => router.push('/dashboard'), 3000);
         } else {
-          fetchDomains(); // Fetch domains only if Pro
+          fetchDomains();
         }
       } else {
         router.push('/signin');
@@ -147,6 +148,8 @@ export default function DomainsPage() {
                 {error}
               </div>
             )}
+            {/* ADD ASSISTANT CHAT HERE FOR NON-PRO USERS */}
+            <AssistantChatPhase2 />
           </main>
         </div>
       </div>
@@ -190,6 +193,9 @@ export default function DomainsPage() {
               </button>
             </div>
           )}
+
+          {/* ADD ASSISTANT CHAT HERE */}
+          <AssistantChatPhase2 />
 
           <div className="max-w-4xl">
             <DomainManagement 

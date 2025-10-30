@@ -10,20 +10,18 @@ export default function CreateAliasForm({
   newAlias,
   isCollaborative,
   submitting = false,
-  verifiedDomains = [], // New prop: list of verified custom domains
-  selectedDomain, // New prop: currently selected domain
-  setSelectedDomain, // New prop: setter for selected domain
+  verifiedDomains = [],
+  selectedDomain,
+  setSelectedDomain,
   handleCreateAlias,
   setNewAlias,
   setIsCollaborative,
 }) {
   const defaultDomain = process.env.NEXT_PUBLIC_MAILGUN_DOMAIN || 'yourdomain.com';
-
-  // All available domains: default + verified custom
   const availableDomains = [defaultDomain, ...verifiedDomains.map(d => d.domain)];
 
   return (
-    <div className="bg-white rounded-xl shadow-md border">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-100 rounded-lg">
@@ -38,7 +36,7 @@ export default function CreateAliasForm({
         </div>
         
         {/* Plan Status */}
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FiInfo className="w-4 h-4 text-blue-500" />
@@ -82,18 +80,18 @@ export default function CreateAliasForm({
       </div>
 
       <div className="p-6">
-        <form onSubmit={(e) => handleCreateAlias(e, selectedDomain)} className="space-y-6"> {/* Pass selectedDomain to handler */}
+        <form onSubmit={(e) => handleCreateAlias(e, selectedDomain)} className="space-y-6">
           <div>
             <label htmlFor="alias-input" className="block text-sm font-medium text-gray-700 mb-2">
               Alias Name <span className="text-red-500">*</span>
             </label>
-            <div className="flex rounded-md shadow-sm">
+            <div className="flex rounded-lg shadow-sm">
               <input
                 id="alias-input"
                 type="text"
                 placeholder="e.g., support, contact, info"
-                className={`flex-1 px-4 py-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm ${
-                  !canCreateMore ? 'bg-gray-50 text-gray-500' : ''
+                className={`flex-1 px-4 py-3 bg-white border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder:text-gray-400 transition-colors ${
+                  !canCreateMore ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
                 }`}
                 value={newAlias}
                 onChange={(e) => setNewAlias(e.target.value)}
@@ -102,11 +100,11 @@ export default function CreateAliasForm({
                 pattern="[a-zA-Z0-9._-]+"
                 title="Only letters, numbers, dots, hyphens and underscores allowed"
               />
-              <span className="inline-flex items-center px-4 py-3 text-gray-500 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md text-sm">
+              <span className="inline-flex items-center px-4 py-3 text-gray-700 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-sm font-medium">
                 @{selectedDomain || defaultDomain}
               </span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1.5">
               Use letters, numbers, dots (.), hyphens (-), and underscores (_) only. 2-50 characters.
             </p>
           </div>
@@ -120,7 +118,7 @@ export default function CreateAliasForm({
               </label>
               <select
                 id="domain-select"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 transition-colors"
                 value={selectedDomain || defaultDomain}
                 onChange={(e) => setSelectedDomain(e.target.value)}
                 disabled={submitting}
@@ -132,7 +130,7 @@ export default function CreateAliasForm({
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1.5">
                 Choose a verified custom domain or use the default.
               </p>
             </div>
@@ -148,11 +146,11 @@ export default function CreateAliasForm({
                     checked={isCollaborative}
                     onChange={(e) => setIsCollaborative(e.target.checked)}
                     disabled={submitting}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
                   />
                 </div>
                 <div className="ml-3">
-                  <label htmlFor="collaborative-checkbox" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <label htmlFor="collaborative-checkbox" className="text-sm font-medium text-gray-700 flex items-center gap-2 cursor-pointer">
                     <FiStar className="w-4 h-4 text-yellow-600" />
                     Make this a collaborative alias
                   </label>
@@ -176,7 +174,7 @@ export default function CreateAliasForm({
             <button
               type="submit"
               disabled={!canCreateMore || !newAlias.trim() || submitting}
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 canCreateMore && newAlias.trim() && !submitting
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -207,7 +205,7 @@ export default function CreateAliasForm({
                 <ul className="text-xs text-gray-600 mt-2 space-y-1">
                   <li>• Unlimited email aliases</li>
                   <li>• Collaborative team aliases</li>
-                  <li>• Custom domains</li> {/* Added mention of custom domains */}
+                  <li>• Custom domains</li>
                   <li>• Advanced analytics</li>
                   <li>• Priority support</li>
                 </ul>
