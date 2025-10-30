@@ -394,8 +394,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-[#0F172A] text-gray-800 dark:text-gray-300">
-      <Sidebar user={user} onUpgrade={handleUpgrade} theme={theme} />
+<div className="flex h-full bg-gray-100 dark:bg-[#0F172A] text-gray-800 dark:text-gray-300">      <Sidebar user={user} onUpgrade={handleUpgrade} theme={theme} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 main-content-scroll scroll-smooth">
@@ -726,10 +725,13 @@ export default function Dashboard() {
         </main>
       </div>
 
-      {/* --- GLOBAL STYLES --- */}
-      <style jsx global>{`
+    <style jsx global>{`
         /* --- Default Light Theme --- */
+        html {
+          height: 100%;
+        }
         body {
+          height: 100%; /* <-- ADD THIS */
           background-color: #F3F4F6; /* bg-gray-100 */
           color: #1F2937; /* text-gray-800 */
           overscroll-behavior: none;
