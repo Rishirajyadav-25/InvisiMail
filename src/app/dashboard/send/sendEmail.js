@@ -445,12 +445,12 @@ export default function SendEmail() {
                     <button
                       type="button"
                       onClick={() => {
-                        setFormData({ to: '', subject: '', message: '' });
-                        setPrompt('');
+                        setFormData({ to: &quot;&quot;, subject: &quot;&quot;, message: &quot;&quot; });
+                        setPrompt(&quot;&quot;);
                         setReplyId(null);
-                        setError('');
-                        setSuccess('');
-                        router.replace('/dashboard/send');
+                        setError(&quot;&quot;);
+                        setSuccess(&quot;&quot;);
+                        router.replace(&quot;/dashboard/send&quot;);
                       }}
                       disabled={aiLoading || loading}
                       className="ml-auto text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline decoration-dotted underline-offset-2"
