@@ -6,8 +6,6 @@ import Header from '@/components/Header';
 import { FiSend, FiMail, FiZap, FiRefreshCw, FiX } from 'react-icons/fi';
 import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
 
-// Fixed ESLint unescaped entities error
-
 export default function SendEmail() {
   const [formData, setFormData] = useState({
     to: '',
@@ -233,7 +231,6 @@ export default function SendEmail() {
   };
 
   const handleUpgrade = async () => {
-    // ... existing upgrade logic (kept for brevity, functional as is) ...
     try {
       const response = await fetch('/api/upgrade', { method: 'POST' });
       if (response.ok) {
@@ -276,7 +273,6 @@ export default function SendEmail() {
       <Sidebar user={user} onUpgrade={handleUpgrade} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Added Header Component Here */}
         <Header user={user} title="Compose" />
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
@@ -351,7 +347,6 @@ export default function SendEmail() {
                           </option>
                         ))}
                       </select>
-                      {/* Custom dropdown arrow if needed, but appearance-none + styling usually cleaner */}
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
                         <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
                       </div>
@@ -422,7 +417,7 @@ export default function SendEmail() {
                       className="flex-1 px-4 py-3 border border-blue-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="e.g., 'Write a polite follow-up for the invoice...'"
+                      placeholder="e.g., &apos;Write a polite follow-up for the invoice...&apos;"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
