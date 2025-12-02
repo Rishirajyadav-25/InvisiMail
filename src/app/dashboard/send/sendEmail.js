@@ -221,6 +221,15 @@ export default function SendEmail() {
     }
   };
 
+  const handleClearAll = () => {
+    setFormData({ to: '', subject: '', message: '' });
+    setPrompt('');
+    setReplyId(null);
+    setError('');
+    setSuccess('');
+    router.replace('/dashboard/send');
+  };
+
   const handleUpgrade = async () => {
     // ... existing upgrade logic (kept for brevity, functional as is) ...
     try {
@@ -444,14 +453,7 @@ export default function SendEmail() {
                     
                     <button
                       type="button"
-                      onClick={() => {
-                        setFormData({ to: "", subject: "", message: "" });
-                        setPrompt("");
-                        setReplyId(null);
-                        setError("");
-                        setSuccess("");
-                        router.replace("/dashboard/send");
-                      }}
+                      onClick={handleClearAll}
                       disabled={aiLoading || loading}
                       className="ml-auto text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline decoration-dotted underline-offset-2"
                     >
