@@ -6,6 +6,8 @@ import Header from '@/components/Header';
 import { FiSend, FiMail, FiZap, FiRefreshCw, FiX } from 'react-icons/fi';
 import AssistantChatPhase2 from '@/components/AssistantChatPhase2';
 
+// Fixed ESLint unescaped entities error
+
 export default function SendEmail() {
   const [formData, setFormData] = useState({
     to: '',
