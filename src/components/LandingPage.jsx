@@ -11,7 +11,9 @@ export default function LandingPage() {
     // Load Spline viewer script dynamically
     const script = document.createElement('script');
     script.type = 'module';
-    script.src = 'https://unpkg.com/@splinetool/viewer@1.10.64/build/spline-viewer.js';
+    script.src = 'https://unpkg.com/@splinetool/viewer@1.12.5/build/spline-viewer.js';
+    
+
     document.body.appendChild(script);
 
     return () => {
@@ -51,14 +53,32 @@ export default function LandingPage() {
       <div className="landing-container">
         {/* HEADER */}
         <header className="landing-header">
-          <h1 className="logo">Email Alias</h1>
-          <Image 
-            src="/image.png" 
-            alt="Gemini Generated Logo" 
-            className="logo-img"
-            width={60}
-            height={60}
-          />
+
+          {/* FIX: Aligned items to flex-start to allow manual margin push on text */}
+          <div className="logo-container" style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <Image 
+              src="/image.png" 
+              alt="Gemini Generated Logo" 
+              className="logo-img"
+              width={60}
+              height={60}
+              style={{ display: 'block' }} 
+            />
+            {/* FIX: Added marginTop: '15px' to push text down */}
+            <h1 
+              className="logo" 
+              style={{ 
+                margin: '15px 0 0 24px', // Top(15px) Right(0) Bottom(0) Left(24px)
+                padding: 0, 
+                lineHeight: '1',
+                position: 'static', 
+                transform: 'none'
+              }}
+            >
+              InvisiMail
+            </h1>
+          </div>
+
           <nav className="landing-nav">
             <a href="#features">Features</a>
             <a href="#trust">Trust</a>
@@ -112,14 +132,15 @@ export default function LandingPage() {
           </div>
           <spline-viewer 
             className="robot-3d" 
-            url="https://prod.spline.design/1g7MorO8KfnT7OcD/scene.splinecode"
+            url="https://prod.spline.design/rdUxwCyuG9PozTJH/scene.splinecode"
+            
           />
         </main>
       </div>
 
       {/* VALUE PROPOSITION */}
       <section id="features" className="section">
-        <h2 className="section-title">Why Email Alias?</h2>
+        <h2 className="section-title">Why InvisiMail?</h2>
         <div className="features-grid">
           <div className="feature-box">
             <h3>🛡 Privacy Protection</h3>
@@ -161,7 +182,7 @@ export default function LandingPage() {
         <div className="faq-grid">
           <div className="faq-box">
             <h3>Is it free?</h3>
-            <p>Yes, Email Alias has a free plan with essential features. Paid tiers unlock more aliases and filters.</p>
+            <p>Yes, InvisiMail has a free plan with essential features. Paid tiers unlock more aliases and filters.</p>
           </div>
           <div className="faq-box">
             <h3>How secure is it?</h3>
@@ -187,7 +208,7 @@ export default function LandingPage() {
 
       {/* FOOTER */}
       <footer className="landing-footer">
-        <p>&copy; 2025 Email Alias. All rights reserved.</p>
+        <p>&copy; 2025 InvisiMail. All rights reserved.</p>
         <div className="footer-links">
           <a href="#">Privacy Policy</a> | 
           <a href="#">Terms</a> | 
